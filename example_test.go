@@ -8,7 +8,7 @@ import (
 )
 
 func Example() {
-	root := graph.NewRootNode("/")
+	root := graph.NewRoot("/")
 	root.Make("etc", "tmp")
 	root.Find("/tmp").Make("y.txt")
 	root.Walk(graph.LsRecursive(os.Stdout))
@@ -20,7 +20,7 @@ func Example() {
 }
 
 func Example_graphManipulation() {
-	root := graph.NewRootNode("/")
+	root := graph.NewRootNode("/", graph.ModeSort)
 	root.Make("etc", "tmp", "usr/")
 	tmp := root.Find("/tmp")
 	tmp.Make("y.txt", "dir")

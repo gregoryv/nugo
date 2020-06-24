@@ -5,17 +5,42 @@ import (
 	"os"
 )
 
+func Example_sortedDistinct() {
+	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root.Make("b", "a")
+	root.Find("/b").Make("2", "1", "1", "2")
+	root.Walk(LsRecursive(os.Stdout))
+	// output:
+	// /
+	// /a
+	// /b
+	// /b/1
+	// /b/2
+}
+
+func Example_sorted() {
+	root := NewRootNode("/", ModeSort)
+	root.Make("c", "b", "a")
+	root.Find("/b").Make("2", "1", "3", "0", "2.5")
+	root.Walk(LsRecursive(os.Stdout))
+	// output:
+	// /
+	// /a
+	// /b
+	// /b/0
+	// /b/1
+	// /b/2
+	// /b/2.5
+	// /b/3
+	// /c
+}
+
 // NewRootNode is a way to root a tree at a given point. Only
 // difference from NewNode is it can contain / in the name.
 func ExampleNewRootNode() {
-	var (
-		root = NewRootNode("/mnt/usb")
-		a    = NewNode("a")
-		b    = NewNode("b")
-		c    = NewNode("file.txt")
-	)
-	root.Add(a, b)
-	a.Add(c)
+	root := NewRoot("/mnt/usb")
+	root.Make("a", "b")
+	root.Find("/mnt/usb/a").Make("file.txt")
 	root.Walk(LsRecursive(os.Stdout))
 	// output:
 	// /mnt/usb
@@ -25,12 +50,8 @@ func ExampleNewRootNode() {
 }
 
 func ExampleNode_FirstChild_listAllChildren() {
-	var (
-		root = NewRootNode("/")
-		a    = NewNode("a")
-		b    = NewNode("b")
-	)
-	root.Add(a, b)
+	root := NewRoot("/")
+	root.Make("a", "b")
 	c := root.FirstChild()
 	for {
 		if c == nil {
@@ -45,23 +66,16 @@ func ExampleNode_FirstChild_listAllChildren() {
 }
 
 func ExampleWalk() {
-	var (
-		root = NewRootNode("/")
-		a    = NewNode("a")
-		b    = NewNode("b")
-		c    = NewNode("c")
-	)
-	root.Add(a, c)
-	a.Add(b, NewNode("1"))
-	c.Add(NewNode("x"), NewNode("y"))
-
+	root := NewRoot("/")
+	root.Make("a", "c")
+	root.Find("/a").Make("b", "1")
+	root.Find("/c").Make("x", "y")
 	root.Walk(func(c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/c/x" {
 			w.Stop()
 		}
 	})
-
 	// output:
 	// /
 	// /a
@@ -72,7 +86,7 @@ func ExampleWalk() {
 }
 
 func ExampleNode_DelChild() {
-	root := NewRootNode("/")
+	root := NewRoot("/")
 	root.Make("etc", "bin", "tmp", "usr/")
 	tmp := root.Find("/tmp")
 	tmp.Make("y.txt", "dir")

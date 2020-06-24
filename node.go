@@ -22,6 +22,14 @@ import (
 	"path"
 )
 
+// A NodeMode represents a node's mode and permission bits.
+type NodeMode uint32
+
+const (
+	ModeSort     NodeMode = 1 << (32 - 1 - iota) // sorted by name
+	ModeDistinct                                 // no duplicate children
+)
+
 // NewNode returns a new node with the given name url path escaped.
 func NewNode(name string) *Node {
 	safe := url.PathEscape(name)
@@ -31,6 +39,7 @@ func NewNode(name string) *Node {
 // Node names and links a sibling and a child.
 type Node struct {
 	name    string
+	mode    NodeMode
 	sibling *Node
 	child   *Node
 }
@@ -38,29 +47,62 @@ type Node struct {
 // Name returns the base name of a node
 func (my *Node) Name() string { return my.name }
 
-// Add adds each child in sequence.
-func (me *Node) Add(children ...*Node) {
-	for _, n := range children {
-		me.addChild(n)
-	}
-}
-
 // Make creates and adds the named children
 func (me *Node) Make(names ...string) {
 	for _, name := range names {
-		n := NewNode(name)
-		me.Add(n)
+		me.Add(NewNode(name))
 	}
 }
 
-// AppendChild adds the given node as the last child
-func (me *Node) addChild(n *Node) {
+// Add adds each child in sequence according to the NodeMode of the
+// parent node.
+func (me *Node) Add(children ...*Node) {
+	for _, n := range children {
+		n.mode = me.mode
+		if n.mode&ModeDistinct == ModeDistinct {
+			me.DelChild(n.Name())
+		}
+		switch {
+		case n.mode&ModeSort == ModeSort:
+			me.insert(n)
+		default:
+			me.append(n)
+		}
+	}
+}
+
+func (me *Node) append(n *Node) {
 	last := me.LastChild()
 	if last == nil {
 		me.child = n
 		return
 	}
 	last.sibling = n
+}
+
+// insert the node sorted by name
+func (me *Node) insert(n *Node) {
+	switch {
+	case me.child == nil:
+		me.child = n
+	case n.Name() < me.child.Name():
+		n.sibling = me.child
+		me.child = n
+	default:
+		c := me.child
+		for {
+			if c.sibling == nil {
+				c.sibling = n
+				return
+			}
+			if n.Name() < c.sibling.Name() {
+				n.sibling = c.sibling
+				c.sibling = n
+				return
+			}
+			c = c.sibling
+		}
+	}
 }
 
 // FirstChild returns the first child or nil if there are no children.
@@ -108,12 +150,18 @@ func (me *Node) DelChild(name string) *Node {
 
 // ----------------------------------------
 
+// NewRoot returns a RootNode with no special mode set.
+func NewRoot(abspath string) *RootNode {
+	return NewRootNode(abspath, 0)
+}
+
 // NewRootNode returns a new node with the name as is. It's the
 // callers responsibility to make sure every basename is safe,
 // Valid abspaths are "/" or "/mnt/usb"
-func NewRootNode(abspath string) *RootNode {
+func NewRootNode(abspath string, mode NodeMode) *RootNode {
 	return &RootNode{
 		Node: &Node{
+			mode: mode,
 			name: path.Clean(abspath),
 		},
 	}

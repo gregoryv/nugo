@@ -1,1 +1,1 @@
-Package nodes provides a directed graph implementation.
+Package graph provides a directed graph implementation.
