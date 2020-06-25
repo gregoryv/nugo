@@ -175,22 +175,15 @@ type RootNode struct {
 // Find returns the node matching the absolute path starting at the
 // root.
 func (me *RootNode) Find(abspath string) *Node {
-	var visit func(*Node, string) *Node
-	abspath = path.Clean(abspath)
-	visit = func(n *Node, p string) *Node {
-		if n == nil {
-			return nil
+	fullname := path.Clean(abspath)
+	var n *Node
+	me.Walk(func(c *Node, abspath string, w *Walker) {
+		if fullname == abspath {
+			n = c
+			w.Stop()
 		}
-		prefix := path.Join(p, n.Name())
-		if prefix == abspath {
-			return n
-		}
-		if n := visit(n.child, prefix); n != nil {
-			return n
-		}
-		return visit(n.sibling, p)
-	}
-	return visit(me.Node, "")
+	})
+	return n
 }
 
 // Walk over each node until walker is stopped. Same as
