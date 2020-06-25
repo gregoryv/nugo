@@ -1,7 +1,6 @@
 /*
 Package graph provides a directed graph implementation.
 
-
   root
     |
     +-- child
@@ -42,6 +41,8 @@ type Node struct {
 	mode    NodeMode
 	sibling *Node
 	child   *Node
+
+	resource interface{}
 }
 
 // Name returns the base name of a node
