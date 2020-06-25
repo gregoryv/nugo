@@ -196,7 +196,7 @@ func (me *RootNode) Find(abspath string) *Node {
 
 // Walk over each node until Walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
-func (me *RootNode) Walk(fn visitor) {
+func (me *RootNode) Walk(fn Visitor) {
 	newWalker().Walk(nil, me.Node, "", fn)
 }
 
@@ -214,9 +214,9 @@ type Walker struct {
 // Stop the Walker from your visitor.
 func (me *Walker) Stop() { me.stopped = true }
 
-// Walk calls the visitor for the given node. The abspath should be
+// Walk calls the Visitor for the given node. The abspath should be
 // that of the parent. Use empty string for root internal.
-func (w *Walker) Walk(parent, child *Node, abspath string, fn visitor) {
+func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 	if child == nil || w.stopped {
 		return
 	}
@@ -225,15 +225,15 @@ func (w *Walker) Walk(parent, child *Node, abspath string, fn visitor) {
 	w.Walk(parent, child.sibling, abspath, fn)
 }
 
-// visitor is called during a walk with a specific node and the
+// Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given Walker to stop if needed.
 // For root nodes the parent is nil.
-type visitor func(parent, child *Node, abspath string, w *Walker)
+type Visitor func(parent, child *Node, abspath string, w *Walker)
 
 // ----------------------------------------
 
 // namePrinter writes abspath to the given writer.
-func namePrinter(w io.Writer) visitor {
+func namePrinter(w io.Writer) Visitor {
 	return func(parent, child *Node, abspath string, Walker *Walker) {
 		fmt.Fprintln(w, abspath)
 	}
