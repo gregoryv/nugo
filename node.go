@@ -224,8 +224,8 @@ type Visitor func(parent, child *Node, abspath string, w *Walker)
 
 // ----------------------------------------
 
-// LsRecursive writes names of the children of n to w
-func LsRecursive(w io.Writer) Visitor {
+// NamePrinter writes abspath to the given writer.
+func NamePrinter(w io.Writer) Visitor {
 	return func(parent, child *Node, abspath string, walker *Walker) {
 		fmt.Fprintln(w, abspath)
 	}

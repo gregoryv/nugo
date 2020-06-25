@@ -11,7 +11,7 @@ func Example() {
 	root := graph.NewRoot("/")
 	root.Make("etc", "tmp")
 	root.Find("/tmp").Make("y.txt")
-	root.Walk(graph.LsRecursive(os.Stdout))
+	root.Walk(graph.NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /etc
