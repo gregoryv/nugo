@@ -159,16 +159,16 @@ func (me *node) delSibling(c *node, name string) *node {
 
 // ----------------------------------------
 
-// NewRoot returns a RootNode with no special mode set.
-func NewRoot(abspath string) *RootNode {
-	return NewRootNode(abspath, 0)
+// NewRoot returns a rootNode with no special mode set.
+func NewRoot(abspath string) *rootNode {
+	return newRootNode(abspath, 0)
 }
 
 // NewRootNode returns a new node with the name as is. It's the
 // callers responsibility to make sure every basename is safe,
 // Valid abspaths are "/" or "/mnt/usb"
-func NewRootNode(abspath string, mode NodeMode) *RootNode {
-	return &RootNode{
+func newRootNode(abspath string, mode NodeMode) *rootNode {
+	return &rootNode{
 		node: &node{
 			mode: mode,
 			name: path.Clean(abspath),
@@ -176,13 +176,13 @@ func NewRootNode(abspath string, mode NodeMode) *RootNode {
 	}
 }
 
-type RootNode struct {
+type rootNode struct {
 	*node
 }
 
 // Find returns the node matching the absolute path starting at the
 // root.
-func (me *RootNode) Find(abspath string) *node {
+func (me *rootNode) Find(abspath string) *node {
 	fullname := path.Clean(abspath)
 	var n *node
 	me.Walk(func(parent, child *node, abspath string, w *Walker) {
@@ -196,7 +196,7 @@ func (me *RootNode) Find(abspath string) *node {
 
 // Walk over each node until walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
-func (me *RootNode) Walk(fn Visitor) {
+func (me *rootNode) Walk(fn Visitor) {
 	NewWalker().Walk(nil, me.node, "", fn)
 }
 

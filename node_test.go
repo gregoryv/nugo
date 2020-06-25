@@ -6,7 +6,7 @@ import (
 )
 
 func Example_sortedDistinct() {
-	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root := newRootNode("/", ModeSort|ModeDistinct)
 	root.Make("b", "a")
 	root.Find("/b").Make("2", "1", "1", "2")
 	root.Walk(NamePrinter(os.Stdout))
@@ -19,7 +19,7 @@ func Example_sortedDistinct() {
 }
 
 func Example_sorted() {
-	root := NewRootNode("/", ModeSort)
+	root := newRootNode("/", ModeSort)
 	root.Make("c", "b", "a")
 	root.Find("/b").Make("2", "1", "3", "0", "2.5")
 	root.Walk(NamePrinter(os.Stdout))

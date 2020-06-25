@@ -18,7 +18,7 @@ func Example() {
 }
 
 func Example_graphManipulation() {
-	root := NewRootNode("/", ModeSort)
+	root := newRootNode("/", ModeSort)
 	root.Make("etc", "tmp", "usr/")
 	tmp := root.Find("/tmp")
 	tmp.Make("y.txt", "dir")
