@@ -29,35 +29,35 @@ const (
 	ModeDistinct                                 // no duplicate children
 )
 
-// NewNode returns a new node with the given name url path escaped.
-func NewNode(name string) *Node {
+// newNode returns a new node with the given name url path escaped.
+func newnode(name string) *node {
 	safe := url.PathEscape(name)
-	return &Node{name: safe}
+	return &node{name: safe}
 }
 
-// Node names and links a sibling and a child.
-type Node struct {
+// node names and links a sibling and a child.
+type node struct {
 	name    string
 	mode    NodeMode
-	sibling *Node
-	child   *Node
+	sibling *node
+	child   *node
 
 	resource interface{}
 }
 
 // Name returns the base name of a node
-func (my *Node) Name() string { return my.name }
+func (my *node) Name() string { return my.name }
 
 // Make creates and adds the named children
-func (me *Node) Make(names ...string) {
+func (me *node) Make(names ...string) {
 	for _, name := range names {
-		me.Add(NewNode(name))
+		me.Add(newnode(name))
 	}
 }
 
 // Add adds each child in sequence according to the NodeMode of the
 // parent node.
-func (me *Node) Add(children ...*Node) {
+func (me *node) Add(children ...*node) {
 	for _, n := range children {
 		n.mode = me.mode
 		if n.mode&ModeDistinct == ModeDistinct {
@@ -72,7 +72,7 @@ func (me *Node) Add(children ...*Node) {
 	}
 }
 
-func (me *Node) append(n *Node) {
+func (me *node) append(n *node) {
 	last := me.LastChild()
 	if last == nil {
 		me.child = n
@@ -82,7 +82,7 @@ func (me *Node) append(n *Node) {
 }
 
 // insert the node sorted by name
-func (me *Node) insert(n *Node) {
+func (me *node) insert(n *node) {
 	switch {
 	case me.child == nil:
 		me.child = n
@@ -95,7 +95,7 @@ func (me *Node) insert(n *Node) {
 }
 
 // insertSibling inserts n as a sibling of c
-func (me *Node) insertSibling(c, n *Node) {
+func (me *node) insertSibling(c, n *node) {
 	for {
 		if c.sibling == nil {
 			c.sibling = n
@@ -111,10 +111,10 @@ func (me *Node) insertSibling(c, n *Node) {
 }
 
 // FirstChild returns the first child or nil if there are no children.
-func (me *Node) FirstChild() *Node { return me.child }
+func (me *node) FirstChild() *node { return me.child }
 
 // LastChild returns the last child or nil if there are no children.
-func (me *Node) LastChild() *Node {
+func (me *node) LastChild() *node {
 	if me.child == nil {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (me *Node) LastChild() *Node {
 
 // DelChild removes the first child with the given name and returns the
 // removed node
-func (me *Node) DelChild(name string) *Node {
+func (me *node) DelChild(name string) *node {
 	if me.child == nil {
 		return nil
 	}
@@ -142,7 +142,7 @@ func (me *Node) DelChild(name string) *Node {
 	return me.delSibling(me.child, name)
 }
 
-func (me *Node) delSibling(c *Node, name string) *Node {
+func (me *node) delSibling(c *node, name string) *node {
 	for {
 		sibling := c.sibling
 		if sibling == nil {
@@ -169,7 +169,7 @@ func NewRoot(abspath string) *RootNode {
 // Valid abspaths are "/" or "/mnt/usb"
 func NewRootNode(abspath string, mode NodeMode) *RootNode {
 	return &RootNode{
-		Node: &Node{
+		node: &node{
 			mode: mode,
 			name: path.Clean(abspath),
 		},
@@ -177,15 +177,15 @@ func NewRootNode(abspath string, mode NodeMode) *RootNode {
 }
 
 type RootNode struct {
-	*Node
+	*node
 }
 
 // Find returns the node matching the absolute path starting at the
 // root.
-func (me *RootNode) Find(abspath string) *Node {
+func (me *RootNode) Find(abspath string) *node {
 	fullname := path.Clean(abspath)
-	var n *Node
-	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
+	var n *node
+	me.Walk(func(parent, child *node, abspath string, w *Walker) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
@@ -197,7 +197,7 @@ func (me *RootNode) Find(abspath string) *Node {
 // Walk over each node until walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
 func (me *RootNode) Walk(fn Visitor) {
-	NewWalker().Walk(nil, me.Node, "", fn)
+	NewWalker().Walk(nil, me.node, "", fn)
 }
 
 // ----------------------------------------
@@ -216,7 +216,7 @@ func (me *Walker) Stop() { me.stopped = true }
 
 // Walk calls the visitor for the given node. The abspath should be
 // that of the parent. Use empty string for root graph.
-func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
+func (w *Walker) Walk(parent, child *node, abspath string, fn Visitor) {
 	if child == nil || w.stopped {
 		return
 	}
@@ -228,13 +228,13 @@ func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given walker to stop if needed.
 // For root nodes the parent is nil.
-type Visitor func(parent, child *Node, abspath string, w *Walker)
+type Visitor func(parent, child *node, abspath string, w *Walker)
 
 // ----------------------------------------
 
 // NamePrinter writes abspath to the given writer.
 func NamePrinter(w io.Writer) Visitor {
-	return func(parent, child *Node, abspath string, walker *Walker) {
+	return func(parent, child *node, abspath string, walker *Walker) {
 		fmt.Fprintln(w, abspath)
 	}
 }

@@ -1,17 +1,15 @@
-package graph_test
+package graph
 
 import (
 	"fmt"
 	"os"
-
-	"github.com/gregoryv/graph"
 )
 
 func Example() {
-	root := graph.NewRoot("/")
+	root := NewRoot("/")
 	root.Make("etc", "tmp")
 	root.Find("/tmp").Make("y.txt")
-	root.Walk(graph.NamePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /etc
@@ -20,13 +18,13 @@ func Example() {
 }
 
 func Example_graphManipulation() {
-	root := graph.NewRootNode("/", graph.ModeSort)
+	root := NewRootNode("/", ModeSort)
 	root.Make("etc", "tmp", "usr/")
 	tmp := root.Find("/tmp")
 	tmp.Make("y.txt", "dir")
 	tmp.DelChild("dir")
 
-	root.Walk(func(parent, child *graph.Node, abspath string, w *graph.Walker) {
+	root.Walk(func(parent, child *node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/tmp/y.txt" {
 			w.Stop()
