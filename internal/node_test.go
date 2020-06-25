@@ -1,4 +1,4 @@
-package graph
+package internal
 
 import (
 	"fmt"
@@ -70,7 +70,7 @@ func ExampleWalk() {
 	root.Make("a", "c")
 	root.Find("/a").Make("b", "1")
 	root.Find("/c").Make("x", "y")
-	root.Walk(func(parent, c *node, abspath string, w *walker) {
+	root.Walk(func(parent, c *Node, abspath string, w *walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/c/x" {
 			w.Stop()

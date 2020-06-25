@@ -1,7 +1,9 @@
 package graph
 
+import "github.com/gregoryv/graph/internal"
+
 func NewSystem() *System {
-	rn := NewRoot("/")
+	rn := internal.NewRoot("/")
 	rn.Make("/bin")
 	return &System{
 		rn: rn,
@@ -9,5 +11,5 @@ func NewSystem() *System {
 }
 
 type System struct {
-	rn *rootNode
+	rn *internal.RootNode
 }

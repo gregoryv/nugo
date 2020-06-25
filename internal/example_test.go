@@ -1,4 +1,4 @@
-package graph
+package internal
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func Example_graphManipulation() {
 	tmp.Make("y.txt", "dir")
 	tmp.DelChild("dir")
 
-	root.Walk(func(parent, child *node, abspath string, w *walker) {
+	root.Walk(func(parent, child *Node, abspath string, w *walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/tmp/y.txt" {
 			w.Stop()
