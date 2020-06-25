@@ -70,7 +70,7 @@ func ExampleWalk() {
 	root.Make("a", "c")
 	root.Find("/a").Make("b", "1")
 	root.Find("/c").Make("x", "y")
-	root.Walk(func(c *Node, abspath string, w *Walker) {
+	root.Walk(func(parent, c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/c/x" {
 			w.Stop()

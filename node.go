@@ -177,9 +177,9 @@ type RootNode struct {
 func (me *RootNode) Find(abspath string) *Node {
 	fullname := path.Clean(abspath)
 	var n *Node
-	me.Walk(func(c *Node, abspath string, w *Walker) {
+	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
 		if fullname == abspath {
-			n = c
+			n = child
 			w.Stop()
 		}
 	})
@@ -189,7 +189,7 @@ func (me *RootNode) Find(abspath string) *Node {
 // Walk over each node until walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
 func (me *RootNode) Walk(fn Visitor) {
-	NewWalker().Walk(me.Node, "", fn)
+	NewWalker().Walk(nil, me.Node, "", fn)
 }
 
 // ----------------------------------------
@@ -208,24 +208,25 @@ func (me *Walker) Stop() { me.stopped = true }
 
 // Walk calls the visitor for the given node. The abspath should be
 // that of the parent. Use empty string for root graph.
-func (w *Walker) Walk(n *Node, abspath string, fn Visitor) {
-	if n == nil || w.stopped {
+func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
+	if child == nil || w.stopped {
 		return
 	}
-	fn(n, path.Join(abspath, n.Name()), w)
-	w.Walk(n.child, path.Join(abspath, n.Name()), fn)
-	w.Walk(n.sibling, abspath, fn)
+	fn(parent, child, path.Join(abspath, child.Name()), w)
+	w.Walk(child, child.child, path.Join(abspath, child.Name()), fn)
+	w.Walk(parent, child.sibling, abspath, fn)
 }
 
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given walker to stop if needed.
-type Visitor func(child *Node, abspath string, w *Walker)
+// For root nodes the parent is nil.
+type Visitor func(parent, child *Node, abspath string, w *Walker)
 
 // ----------------------------------------
 
 // LsRecursive writes names of the children of n to w
 func LsRecursive(w io.Writer) Visitor {
-	return func(child *Node, abspath string, walker *Walker) {
+	return func(parent, child *Node, abspath string, walker *Walker) {
 		fmt.Fprintln(w, abspath)
 	}
 }
