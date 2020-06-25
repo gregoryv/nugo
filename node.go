@@ -90,19 +90,23 @@ func (me *Node) insert(n *Node) {
 		n.sibling = me.child
 		me.child = n
 	default:
-		c := me.child
-		for {
-			if c.sibling == nil {
-				c.sibling = n
-				return
-			}
-			if n.Name() < c.sibling.Name() {
-				n.sibling = c.sibling
-				c.sibling = n
-				return
-			}
-			c = c.sibling
+		me.insertSibling(me.child, n)
+	}
+}
+
+// insertSibling inserts n as a sibling of c
+func (me *Node) insertSibling(c, n *Node) {
+	for {
+		if c.sibling == nil {
+			c.sibling = n
+			return
 		}
+		if n.Name() < c.sibling.Name() {
+			n.sibling = c.sibling
+			c.sibling = n
+			return
+		}
+		c = c.sibling
 	}
 }
 
@@ -135,16 +139,20 @@ func (me *Node) DelChild(name string) *Node {
 		me.child = next.sibling
 		return next
 	}
+	return me.delSibling(me.child, name)
+}
+
+func (me *Node) delSibling(c *Node, name string) *Node {
 	for {
-		sibling := next.sibling
+		sibling := c.sibling
 		if sibling == nil {
 			break
 		}
 		if sibling.name == name {
-			next.sibling = next.sibling.sibling
+			c.sibling = c.sibling.sibling
 			return sibling
 		}
-		next = sibling
+		c = sibling
 	}
 	return nil
 }
