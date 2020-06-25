@@ -232,8 +232,8 @@ type visitor func(parent, child *node, abspath string, w *walker)
 
 // ----------------------------------------
 
-// NamePrinter writes abspath to the given writer.
-func NamePrinter(w io.Writer) visitor {
+// namePrinter writes abspath to the given writer.
+func namePrinter(w io.Writer) visitor {
 	return func(parent, child *node, abspath string, walker *walker) {
 		fmt.Fprintln(w, abspath)
 	}
