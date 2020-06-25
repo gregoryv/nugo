@@ -185,7 +185,7 @@ type RootNode struct {
 func (me *RootNode) Find(abspath string) *Node {
 	fullname := path.Clean(abspath)
 	var n *Node
-	me.Walk(func(parent, child *Node, abspath string, w *walker) {
+	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
@@ -194,7 +194,7 @@ func (me *RootNode) Find(abspath string) *Node {
 	return n
 }
 
-// Walk over each node until walker is stopped. Same as
+// Walk over each node until Walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
 func (me *RootNode) Walk(fn visitor) {
 	newWalker().Walk(nil, me.Node, "", fn)
@@ -202,21 +202,21 @@ func (me *RootNode) Walk(fn visitor) {
 
 // ----------------------------------------
 
-func newWalker() *walker {
-	return &walker{}
+func newWalker() *Walker {
+	return &Walker{}
 }
 
-// walker holds state of a walk.
-type walker struct {
+// Walker holds state of a walk.
+type Walker struct {
 	stopped bool
 }
 
-// Stop the walker from your visitor.
-func (me *walker) Stop() { me.stopped = true }
+// Stop the Walker from your visitor.
+func (me *Walker) Stop() { me.stopped = true }
 
 // Walk calls the visitor for the given node. The abspath should be
 // that of the parent. Use empty string for root internal.
-func (w *walker) Walk(parent, child *Node, abspath string, fn visitor) {
+func (w *Walker) Walk(parent, child *Node, abspath string, fn visitor) {
 	if child == nil || w.stopped {
 		return
 	}
@@ -226,15 +226,15 @@ func (w *walker) Walk(parent, child *Node, abspath string, fn visitor) {
 }
 
 // visitor is called during a walk with a specific node and the
-// absolute path to that node. Use the given walker to stop if needed.
+// absolute path to that node. Use the given Walker to stop if needed.
 // For root nodes the parent is nil.
-type visitor func(parent, child *Node, abspath string, w *walker)
+type visitor func(parent, child *Node, abspath string, w *Walker)
 
 // ----------------------------------------
 
 // namePrinter writes abspath to the given writer.
 func namePrinter(w io.Writer) visitor {
-	return func(parent, child *Node, abspath string, walker *walker) {
+	return func(parent, child *Node, abspath string, Walker *Walker) {
 		fmt.Fprintln(w, abspath)
 	}
 }
