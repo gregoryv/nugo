@@ -185,7 +185,7 @@ type rootNode struct {
 func (me *rootNode) Find(abspath string) *node {
 	fullname := path.Clean(abspath)
 	var n *node
-	me.Walk(func(parent, child *node, abspath string, w *Walker) {
+	me.Walk(func(parent, child *node, abspath string, w *walker) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
@@ -197,26 +197,26 @@ func (me *rootNode) Find(abspath string) *node {
 // Walk over each node until walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
 func (me *rootNode) Walk(fn Visitor) {
-	NewWalker().Walk(nil, me.node, "", fn)
+	newWalker().Walk(nil, me.node, "", fn)
 }
 
 // ----------------------------------------
 
-func NewWalker() *Walker {
-	return &Walker{}
+func newWalker() *walker {
+	return &walker{}
 }
 
-// Walker holds state of a walk.
-type Walker struct {
+// walker holds state of a walk.
+type walker struct {
 	stopped bool
 }
 
 // Stop the walker from your visitor.
-func (me *Walker) Stop() { me.stopped = true }
+func (me *walker) Stop() { me.stopped = true }
 
 // Walk calls the visitor for the given node. The abspath should be
 // that of the parent. Use empty string for root graph.
-func (w *Walker) Walk(parent, child *node, abspath string, fn Visitor) {
+func (w *walker) Walk(parent, child *node, abspath string, fn Visitor) {
 	if child == nil || w.stopped {
 		return
 	}
@@ -228,13 +228,13 @@ func (w *Walker) Walk(parent, child *node, abspath string, fn Visitor) {
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given walker to stop if needed.
 // For root nodes the parent is nil.
-type Visitor func(parent, child *node, abspath string, w *Walker)
+type Visitor func(parent, child *node, abspath string, w *walker)
 
 // ----------------------------------------
 
 // NamePrinter writes abspath to the given writer.
 func NamePrinter(w io.Writer) Visitor {
-	return func(parent, child *node, abspath string, walker *Walker) {
+	return func(parent, child *node, abspath string, walker *walker) {
 		fmt.Fprintln(w, abspath)
 	}
 }
