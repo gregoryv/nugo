@@ -21,11 +21,11 @@ import (
 	"path"
 )
 
-// A NodeMode represents a node's mode and permission bits.
-type NodeMode uint32
+// A nodeMode represents a node's mode and permission bits.
+type nodeMode uint32
 
 const (
-	ModeSort     NodeMode = 1 << (32 - 1 - iota) // sorted by name
+	ModeSort     nodeMode = 1 << (32 - 1 - iota) // sorted by name
 	ModeDistinct                                 // no duplicate children
 )
 
@@ -38,7 +38,7 @@ func newnode(name string) *node {
 // node names and links a sibling and a child.
 type node struct {
 	name    string
-	mode    NodeMode
+	mode    nodeMode
 	sibling *node
 	child   *node
 
@@ -55,7 +55,7 @@ func (me *node) Make(names ...string) {
 	}
 }
 
-// Add adds each child in sequence according to the NodeMode of the
+// Add adds each child in sequence according to the nodeMode of the
 // parent node.
 func (me *node) Add(children ...*node) {
 	for _, n := range children {
@@ -167,7 +167,7 @@ func NewRoot(abspath string) *rootNode {
 // NewRootNode returns a new node with the name as is. It's the
 // callers responsibility to make sure every basename is safe,
 // Valid abspaths are "/" or "/mnt/usb"
-func newRootNode(abspath string, mode NodeMode) *rootNode {
+func newRootNode(abspath string, mode nodeMode) *rootNode {
 	return &rootNode{
 		node: &node{
 			mode: mode,
