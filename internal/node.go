@@ -19,6 +19,7 @@ import (
 	"io"
 	"net/url"
 	"path"
+	"strings"
 )
 
 // A NodeMode represents a node's mode and permission bits.
@@ -29,6 +30,31 @@ const (
 	ModeDistinct                                 // no duplicate children
 )
 
+// String returns the bits as string using rwx notation for each bit.
+func (m NodeMode) String() string {
+	var s strings.Builder
+	s.WriteByte(mChar(m, 04000, 'r'))
+	s.WriteByte(mChar(m, 02000, 'w'))
+	s.WriteByte(mChar(m, 01000, 'x'))
+	s.WriteByte(mChar(m, 00400, 'r'))
+	s.WriteByte(mChar(m, 00200, 'w'))
+	s.WriteByte(mChar(m, 00100, 'x'))
+	s.WriteByte(mChar(m, 00040, 'r'))
+	s.WriteByte(mChar(m, 00020, 'w'))
+	s.WriteByte(mChar(m, 00010, 'x'))
+	s.WriteByte(mChar(m, 00004, 'r'))
+	s.WriteByte(mChar(m, 00002, 'w'))
+	s.WriteByte(mChar(m, 00001, 'x'))
+	return s.String()
+}
+
+func mChar(m, mask NodeMode, c byte) byte {
+	if m&mask == mask {
+		return c
+	}
+	return '-'
+}
+
 // newNode returns a new node with the given name url path escaped.
 func NewNode(name string) *Node {
 	safe := url.PathEscape(name)
@@ -38,15 +64,23 @@ func NewNode(name string) *Node {
 // node names and links a sibling and a child.
 type Node struct {
 	name    string
-	mode    NodeMode
 	sibling *Node
 	child   *Node
+
+	uid  int
+	gid  int
+	mode NodeMode
 
 	resource interface{}
 }
 
 // Name returns the base name of a node
 func (my *Node) Name() string { return my.name }
+
+// Seal returns the access control seal of this node.
+func (my *Node) Seal() *Seal {
+	return &Seal{uid: my.uid, gid: my.gid, perm: my.mode}
+}
 
 // Make creates and adds the named children
 func (me *Node) Make(names ...string) {
@@ -236,5 +270,12 @@ type Visitor func(parent, child *Node, abspath string, w *Walker)
 func NamePrinter(w io.Writer) Visitor {
 	return func(parent, child *Node, abspath string, Walker *Walker) {
 		fmt.Fprintln(w, abspath)
+	}
+}
+
+// NodePrinter writes permissions and ownership with each node
+func NodePrinter(w io.Writer) Visitor {
+	return func(parent, child *Node, abspath string, Walker *Walker) {
+		fmt.Fprintln(w, child.Seal().String(), abspath)
 	}
 }

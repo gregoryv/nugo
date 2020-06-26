@@ -5,6 +5,13 @@ import (
 	"os"
 )
 
+func ExampleNodePrinter() {
+	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root.Walk(NodePrinter(os.Stdout))
+	// output:
+	// ------------ 0 0 /
+}
+
 func Example_sortedDistinct() {
 	root := NewRootNode("/", ModeSort|ModeDistinct)
 	root.Make("b", "a")

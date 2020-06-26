@@ -3,7 +3,7 @@ package nugo
 import (
 	"io"
 
-	"github.com/gregoryv/graph/internal"
+	"github.com/gregoryv/nugo/internal"
 )
 
 func NewSystem() *System {
@@ -31,5 +31,5 @@ func (me *System) mounts(abspath string) *internal.RootNode {
 
 // dumprs writes the entire graph
 func (me *System) dumprs(w io.Writer) {
-	me.mounts("/").Walk(internal.NamePrinter(w))
+	me.mounts("/").Walk(internal.NodePrinter(w))
 }

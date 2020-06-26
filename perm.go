@@ -2,16 +2,6 @@ package nugo
 
 import "sync"
 
-type Sealed interface {
-	Seal() Seal
-}
-
-type Seal struct {
-	uid  int // owner
-	gid  int // group
-	perm uint32
-}
-
 // NewAccount returns a new account with the given uid as both uid and
 // group id.
 func NewAccount(username string, uid int) *Account {
