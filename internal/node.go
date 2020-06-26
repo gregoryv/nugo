@@ -161,13 +161,13 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 
 // NewRoot returns a rootNode with no special mode set.
 func NewRoot(abspath string) *RootNode {
-	return newRootNode(abspath, 0)
+	return NewRootNode(abspath, 0)
 }
 
 // NewRootNode returns a new node with the name as is. It's the
 // callers responsibility to make sure every basename is safe,
 // Valid abspaths are "/" or "/mnt/usb"
-func newRootNode(abspath string, mode NodeMode) *RootNode {
+func NewRootNode(abspath string, mode NodeMode) *RootNode {
 	return &RootNode{
 		Node: &Node{
 			mode: mode,
