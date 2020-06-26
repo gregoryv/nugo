@@ -1,7 +1,6 @@
 /*
 
-Package rs provides an access controlled resource graph similar to
-unix style permissions.
+Package rs provides a resource system with unix style access control.
 
 The graph is a set of linked nodes
 
@@ -114,7 +113,7 @@ func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
 // The new node as ModeDir set.
 func (me *Node) Make(name string) *Node {
 	n := NewNode(name)
-	n.mode = ModeDir
+	n.SetSeal(me.uid, me.gid, me.mode) // inherit parent
 	me.Add(n)
 	return n
 }
