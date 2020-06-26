@@ -26,8 +26,9 @@ import (
 type NodeMode uint32
 
 const (
-	ModeSort     NodeMode = 1 << (32 - 1 - iota) // sorted by name
-	ModeDistinct                                 // no duplicate children
+	ModeDir      NodeMode = 1 << (32 - 1 - iota)
+	ModeSort              // sorted by name
+	ModeDistinct          // no duplicate children
 
 	ModeType NodeMode = ModeSort | ModeDistinct
 	ModePerm NodeMode = 07777
@@ -36,6 +37,7 @@ const (
 // String returns the bits as string using rwx notation for each bit.
 func (m NodeMode) String() string {
 	var s strings.Builder
+	s.WriteByte(mChar(m, ModeDir, 'd'))
 	s.WriteByte(mChar(m, 04000, 'r'))
 	s.WriteByte(mChar(m, 02000, 'w'))
 	s.WriteByte(mChar(m, 01000, 'x'))
@@ -93,9 +95,8 @@ func (my *Node) SetGID(gid int) { my.gid = gid }
 
 // SetPerm permission bits of this node.
 func (my *Node) SetPerm(perm NodeMode) {
-	my.mode = my.mode &^ ModePerm // clear previous
-	perm = perm & ModePerm        // only use permission bits
-	my.mode = my.mode | perm
+	mode := my.mode &^ ModePerm // clear previous
+	my.mode = mode | perm
 }
 
 // SetSeal sets ownership and permission mode of the this node.
@@ -105,9 +106,11 @@ func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
 	my.SetPerm(mode)
 }
 
-// Make creates and adds the named child returning the new node
+// Make creates and adds the named child returning the new node.
+// The new node as ModeDir set.
 func (me *Node) Make(name string) *Node {
 	n := NewNode(name)
+	n.mode = ModeDir
 	me.Add(n)
 	return n
 }
@@ -223,9 +226,9 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 
 // ----------------------------------------
 
-// NewRoot returns a rootNode with no special mode set.
+// NewRoot returns a rootNode with ModeDir set.
 func NewRoot(abspath string) *RootNode {
-	return NewRootNode(abspath, 0)
+	return NewRootNode(abspath, ModeDir)
 }
 
 // NewRootNode returns a new node with the name as is. It's the

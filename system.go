@@ -7,9 +7,11 @@ import (
 )
 
 func NewSystem() *System {
-	rnMode := internal.ModeSort | internal.ModeDistinct
+	rnMode := internal.ModeDir | internal.ModeSort | internal.ModeDistinct
 	rn := internal.NewRootNode("/", rnMode)
-	rn.Make("bin")
+	rn.SetSeal(1, 1, 01755)
+	n := rn.Make("bin")
+	n.SetSeal(1, 1, 01755)
 	return &System{
 		rn: rn,
 	}

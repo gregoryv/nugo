@@ -2,10 +2,10 @@ package nugo
 
 import "os"
 
-func ExampleSystem_ls() {
+func ExampleSystem_dumprs() {
 	sys := NewSystem()
 	sys.dumprs(os.Stdout)
 	// output:
-	// /
-	// /bin
+	// d--xrwxr-xr-x 1 1 /
+	// d--xrwxr-xr-x 1 1 /bin
 }

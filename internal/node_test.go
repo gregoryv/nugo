@@ -6,11 +6,11 @@ import (
 )
 
 func ExampleNodePrinter() {
-	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
 	root.Walk(NodePrinter(os.Stdout))
 	// output:
-	// --xrwxr-xr-x 1 1 /
+	// d--xrwxr-xr-x 1 1 /
 }
 
 func Example_sortedDistinct() {
