@@ -7,8 +7,8 @@ import (
 
 func Example() {
 	root := NewRoot("/")
-	root.Make("etc", "tmp")
-	root.Find("/tmp").Make("y.txt")
+	root.MakeAll("etc", "tmp")
+	root.Find("/tmp").MakeAll("y.txt")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
@@ -19,9 +19,9 @@ func Example() {
 
 func Example_graphManipulation() {
 	root := NewRootNode("/", ModeSort)
-	root.Make("etc", "tmp", "usr/")
+	root.MakeAll("etc", "tmp", "usr/")
 	tmp := root.Find("/tmp")
-	tmp.Make("y.txt", "dir")
+	tmp.MakeAll("y.txt", "dir")
 	tmp.DelChild("dir")
 
 	root.Walk(func(parent, child *Node, abspath string, w *Walker) {

@@ -28,6 +28,9 @@ type NodeMode uint32
 const (
 	ModeSort     NodeMode = 1 << (32 - 1 - iota) // sorted by name
 	ModeDistinct                                 // no duplicate children
+
+	ModeType NodeMode = ModeSort | ModeDistinct
+	ModePerm NodeMode = 07777
 )
 
 // String returns the bits as string using rwx notation for each bit.
@@ -82,10 +85,37 @@ func (my *Node) Seal() *Seal {
 	return &Seal{uid: my.uid, gid: my.gid, perm: my.mode}
 }
 
-// Make creates and adds the named children
-func (me *Node) Make(names ...string) {
+// SetUID sets the owner id of this node.
+func (my *Node) SetUID(uid int) { my.uid = uid }
+
+// SetGID sets group owner of this node.
+func (my *Node) SetGID(gid int) { my.gid = gid }
+
+// SetPerm permission bits of this node.
+func (my *Node) SetPerm(perm NodeMode) {
+	my.mode = my.mode &^ ModePerm // clear previous
+	perm = perm & ModePerm        // only use permission bits
+	my.mode = my.mode | perm
+}
+
+// SetSeal sets ownership and permission mode of the this node.
+func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
+	my.SetUID(uid)
+	my.SetGID(gid)
+	my.SetPerm(mode)
+}
+
+// Make creates and adds the named child returning the new node
+func (me *Node) Make(name string) *Node {
+	n := NewNode(name)
+	me.Add(n)
+	return n
+}
+
+// MakeAll creates and adds the named children
+func (me *Node) MakeAll(names ...string) {
 	for _, name := range names {
-		me.Add(NewNode(name))
+		me.Make(name)
 	}
 }
 

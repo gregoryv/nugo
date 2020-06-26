@@ -7,15 +7,16 @@ import (
 
 func ExampleNodePrinter() {
 	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root.SetSeal(1, 1, 01755)
 	root.Walk(NodePrinter(os.Stdout))
 	// output:
-	// ------------ 0 0 /
+	// --xrwxr-xr-x 1 1 /
 }
 
 func Example_sortedDistinct() {
 	root := NewRootNode("/", ModeSort|ModeDistinct)
-	root.Make("b", "a")
-	root.Find("/b").Make("2", "1", "1", "2")
+	root.MakeAll("b", "a")
+	root.Find("/b").MakeAll("2", "1", "1", "2")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
@@ -27,8 +28,8 @@ func Example_sortedDistinct() {
 
 func Example_sorted() {
 	root := NewRootNode("/", ModeSort)
-	root.Make("c", "b", "a")
-	root.Find("/b").Make("2", "1", "3", "0", "2.5")
+	root.MakeAll("c", "b", "a")
+	root.Find("/b").MakeAll("2", "1", "3", "0", "2.5")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
@@ -46,8 +47,8 @@ func Example_sorted() {
 // difference from NewNode is it can contain / in the name.
 func ExampleNewRootNode() {
 	root := NewRoot("/mnt/usb")
-	root.Make("a", "b")
-	root.Find("/mnt/usb/a").Make("file.txt")
+	root.MakeAll("a", "b")
+	root.Find("/mnt/usb/a").MakeAll("file.txt")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /mnt/usb
@@ -58,7 +59,7 @@ func ExampleNewRootNode() {
 
 func ExampleNode_FirstChild_listAllChildren() {
 	root := NewRoot("/")
-	root.Make("a", "b")
+	root.MakeAll("a", "b")
 	c := root.FirstChild()
 	for {
 		if c == nil {
@@ -74,9 +75,9 @@ func ExampleNode_FirstChild_listAllChildren() {
 
 func ExampleWalk() {
 	root := NewRoot("/")
-	root.Make("a", "c")
-	root.Find("/a").Make("b", "1")
-	root.Find("/c").Make("x", "y")
+	root.MakeAll("a", "c")
+	root.Find("/a").MakeAll("b", "1")
+	root.Find("/c").MakeAll("x", "y")
 	root.Walk(func(parent, c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/c/x" {
@@ -94,9 +95,9 @@ func ExampleWalk() {
 
 func ExampleNode_DelChild() {
 	root := NewRoot("/")
-	root.Make("etc", "bin", "tmp", "usr/")
+	root.MakeAll("etc", "bin", "tmp", "usr/")
 	tmp := root.Find("/tmp")
-	tmp.Make("y.txt", "dir")
+	tmp.MakeAll("y.txt", "dir")
 
 	root.DelChild("etc")
 	root.DelChild("no such")
