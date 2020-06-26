@@ -9,7 +9,7 @@ func Example() {
 	root := NewRoot("/")
 	root.Make("etc", "tmp")
 	root.Find("/tmp").Make("y.txt")
-	root.Walk(namePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /etc

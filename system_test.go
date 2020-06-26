@@ -1,8 +1,9 @@
 package graph
 
-import "testing"
+import "os"
 
-func TestSystem(t *testing.T) {
-	_ = NewSystem()
-
+func ExampleSystem_ls() {
+	sys := NewSystem()
+	sys.ls(os.Stdout)
+	// output:
 }

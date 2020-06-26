@@ -9,7 +9,7 @@ func Example_sortedDistinct() {
 	root := newRootNode("/", ModeSort|ModeDistinct)
 	root.Make("b", "a")
 	root.Find("/b").Make("2", "1", "1", "2")
-	root.Walk(namePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /a
@@ -22,7 +22,7 @@ func Example_sorted() {
 	root := newRootNode("/", ModeSort)
 	root.Make("c", "b", "a")
 	root.Find("/b").Make("2", "1", "3", "0", "2.5")
-	root.Walk(namePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /a
@@ -41,7 +41,7 @@ func ExampleNewRootNode() {
 	root := NewRoot("/mnt/usb")
 	root.Make("a", "b")
 	root.Find("/mnt/usb/a").Make("file.txt")
-	root.Walk(namePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /mnt/usb
 	// /mnt/usb/a
@@ -96,7 +96,7 @@ func ExampleNode_DelChild() {
 	root.Find("/bin").DelChild("no such")
 	tmp.DelChild("dir")
 	tmp.DelChild("x.gz")
-	root.Walk(namePrinter(os.Stdout))
+	root.Walk(NamePrinter(os.Stdout))
 	// output:
 	// /
 	// /bin
