@@ -1,4 +1,4 @@
-package internal
+package nugo
 
 import "fmt"
 

@@ -3,12 +3,12 @@ package sys
 import (
 	"io"
 
-	"github.com/gregoryv/nugo/internal"
+	"github.com/gregoryv/nugo"
 )
 
 func NewSystem() *System {
-	rnMode := internal.ModeDir | internal.ModeSort | internal.ModeDistinct
-	rn := internal.NewRootNode("/", rnMode)
+	rnMode := nugo.ModeDir | nugo.ModeSort | nugo.ModeDistinct
+	rn := nugo.NewRootNode("/", rnMode)
 	rn.SetSeal(1, 1, 01755)
 	n := rn.Make("bin")
 	n.SetSeal(1, 1, 01755)
@@ -18,12 +18,12 @@ func NewSystem() *System {
 }
 
 type System struct {
-	rn *internal.RootNode
+	rn *nugo.RootNode
 }
 
 // mounts returns the mounting point of the abspath. Currently only
 // "/" is available.
-func (me *System) mounts(abspath string) *internal.RootNode {
+func (me *System) mounts(abspath string) *nugo.RootNode {
 	return me.rn
 }
 
@@ -33,5 +33,5 @@ func (me *System) mounts(abspath string) *internal.RootNode {
 
 // dumprs writes the entire graph
 func (me *System) dumprs(w io.Writer) {
-	me.mounts("/").Walk(internal.NodePrinter(w))
+	me.mounts("/").Walk(nugo.NodePrinter(w))
 }
