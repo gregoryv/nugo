@@ -1,5 +1,9 @@
 /*
-Package nugo provides a directed nugo implementation.
+
+Package rs provides an access controlled resource graph similar to
+unix style permissions.
+
+The graph is a set of linked nodes
 
   root
     |
@@ -12,7 +16,7 @@ Package nugo provides a directed nugo implementation.
                  ...
 
 */
-package nugo
+package rs
 
 import (
 	"fmt"
@@ -282,7 +286,7 @@ type Walker struct {
 func (me *Walker) Stop() { me.stopped = true }
 
 // Walk calls the Visitor for the given node. The abspath should be
-// that of the parent. Use empty string for root nugo.
+// that of the parent. Use empty string for root rs.
 func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 	if child == nil || w.stopped {
 		return
