@@ -212,6 +212,17 @@ func (me *Node) DelChild(name string) *Node {
 	return me.delSibling(me.child, name)
 }
 
+// copy returns a copy of the given node without child, sibling
+// relations or resource
+func (me *Node) copy() *Node {
+	return &Node{
+		name: me.name,
+		uid:  me.uid,
+		gid:  me.gid,
+		mode: me.mode,
+	}
+}
+
 func (me *Node) delSibling(c *Node, name string) *Node {
 	for {
 		sibling := c.sibling
@@ -262,6 +273,29 @@ func (me *RootNode) Find(abspath string) *Node {
 		}
 	})
 	return n
+}
+
+// Locate returns a new root node with each child set.
+func (me *RootNode) Locate(abspath string) *RootNode {
+	fullname := path.Clean(abspath)
+	newRoot := NewRootNode(me.name, me.mode)
+	newRoot.Node = me.Node.copy()
+
+	n := newRoot.Node
+	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
+		if parent == nil { // skip parent
+			return
+		}
+		if strings.Index(fullname, abspath) == 0 {
+			c := child.copy()
+			n.child = c
+			if fullname == abspath {
+				w.Stop()
+			}
+			n = c
+		}
+	})
+	return newRoot
 }
 
 // Walk over each node until Walker is stopped. Same as

@@ -5,6 +5,18 @@ import (
 	"os"
 )
 
+func ExampleRootNode_Locate() {
+	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	root.SetSeal(1, 1, 01755)
+	root.MakeAll("etc", "tmp")
+
+	n := root.Locate("/etc")
+	n.Walk(NodePrinter(os.Stdout))
+	// output:
+	// d--xrwxr-xr-x 1 1 /
+	// d--xrwxr-xr-x 1 1 /etc
+}
+
 func ExampleNodePrinter() {
 	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
