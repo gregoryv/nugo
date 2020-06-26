@@ -1,4 +1,4 @@
-module github.com/gregoryv/graph
+module github.com/gregoryv/nugo
 
 go 1.14
 

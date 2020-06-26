@@ -1,4 +1,4 @@
-package graph
+package nugo
 
 import "testing"
 
