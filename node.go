@@ -14,6 +14,18 @@ The graph is a set of linked nodes
                  sibling
                  ...
 
+In addition to the standard unix permission rwxrwxrwx another set of
+rwx are added to indicate anonymous access control. Permission bits
+for "Other" means other authenticated.
+
+             rwxrwxrwxrwx    ModePerm
+              n  u  g  o
+              |  |  |  |
+  aNonymous --+  |  |  |
+       User -----+  |  |
+      Group --------+  |
+      Other -----------+
+
 */
 package rs
 
