@@ -224,14 +224,16 @@ func (me *Node) DelChild(name string) *Node {
 	return me.delSibling(me.child, name)
 }
 
-// copy returns a copy of the given node without child, sibling
-// relations or resource
+// copy returns a copy of the given node
 func (me *Node) copy() *Node {
 	return &Node{
-		name: me.name,
-		uid:  me.uid,
-		gid:  me.gid,
-		mode: me.mode,
+		name:     me.name,
+		uid:      me.uid,
+		gid:      me.gid,
+		mode:     me.mode,
+		child:    me.child,
+		sibling:  me.sibling,
+		resource: me.resource,
 	}
 }
 
