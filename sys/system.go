@@ -1,6 +1,7 @@
 package sys
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"path"
@@ -19,8 +20,7 @@ func NewSystem() *System {
 	sys := &System{
 		rn: rn,
 	}
-	sys.Install("/bin/mkdir", nil, Root, 00755)
-	// todo mkdir command
+	sys.Install("/bin/mkdir", &MkdirCmd{}, Root, 00755)
 
 	// todo use mkdir to create subsequent directories
 	// Root.Exec("/bin/mkdir", &Mkdir{
@@ -106,4 +106,22 @@ func (me *System) Mkdir(abspath string, mode rs.NodeMode, acc *Account) (*rs.Nod
 	newNode := n.Make(name)
 	newNode.SetPerm(mode)
 	return newNode, nil
+}
+
+type MkdirCmd struct{}
+
+func (me *MkdirCmd) Exec(c *Command, args ...string) error {
+	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
+	mode := flags.Uint("m", 00755, "mode for new directory")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	abspath := flags.Arg(0)
+	_, err := c.sys.Mkdir(abspath, rs.NodeMode(*mode), c.acc)
+	return err
+}
+
+type Command struct {
+	sys *System
+	acc *Account
 }
