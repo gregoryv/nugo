@@ -16,14 +16,21 @@ func NewSystem() *System {
 	rn.SetSeal(1, 1, 01755)
 	rn.Make("bin")
 
-	etc := rn.Make("etc")
-	etc.SetPerm(00755)
-	etc.Make("accounts")
-
 	sys := &System{
 		rn: rn,
 	}
 	sys.Install("/bin/mkdir", nil, Root, 00755)
+	// todo mkdir command
+
+	// todo use mkdir to create subsequent directories
+	// Root.Exec("/bin/mkdir", &Mkdir{
+	//    Abspath: "/etc",
+	//    Mode: 00755,
+	// })
+	etc := rn.Make("etc")
+	etc.SetPerm(00755)
+	etc.Make("accounts")
+
 	return sys
 }
 
@@ -48,7 +55,7 @@ func (me *System) dumprs(w io.Writer) {
 
 // install resource at the absolute path
 func (me *System) Install(
-	abspath string, resource interface{}, acc *Account, perm rs.NodeMode,
+	abspath string, resource interface{}, acc *Account, mode rs.NodeMode,
 ) (
 	*rs.Node, error,
 ) {
@@ -61,7 +68,7 @@ func (me *System) Install(
 		return nil, fmt.Errorf("Install: %v", err)
 	}
 	newNode := n.Make(name)
-	newNode.SetPerm(perm)
+	newNode.SetPerm(mode)
 	newNode.SetResource(resource)
 	newNode.UnsetMode(rs.ModeDir)
 	if resource != nil {
@@ -84,4 +91,19 @@ func (me *System) Stat(abspath string, acc *Account) (*rs.Node, error) {
 		}
 	}
 	return nodes[len(nodes)-1], nil
+}
+
+// Mkdir creates the director given by abspath
+func (me *System) Mkdir(abspath string, mode rs.NodeMode, acc *Account) (*rs.Node, error) {
+	dir, name := path.Split(abspath)
+	n, err := me.Stat(dir, acc)
+	if err != nil {
+		return nil, fmt.Errorf("Mkdir: %w", err)
+	}
+	if err := acc.Permitted(OpWrite, n.Seal()); err != nil {
+		return nil, fmt.Errorf("Mkdir: %w", err)
+	}
+	newNode := n.Make(name)
+	newNode.SetPerm(mode)
+	return newNode, nil
 }

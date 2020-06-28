@@ -48,3 +48,14 @@ func TestSystem_Install(t *testing.T) {
 	bad(Install("/bin/nosuchdir/x", nil, Root, 0))
 	bad(Install("/bin/x", nil, Anonymous, 0))
 }
+
+func TestSystem_Mkdir(t *testing.T) {
+	var (
+		sys     = NewSystem()
+		Mkdir   = sys.Mkdir
+		ok, bad = asserter.NewMixed(t)
+	)
+	bad(Mkdir("/nosuch/whatever", 0, Root))
+	bad(Mkdir("/whatever", 0, Anonymous))
+	ok(Mkdir("/whatever", 0, Root))
+}
