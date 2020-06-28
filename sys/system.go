@@ -3,6 +3,7 @@ package sys
 import (
 	"fmt"
 	"io"
+	"path"
 
 	"github.com/gregoryv/rs"
 )
@@ -22,6 +23,7 @@ func NewSystem() *System {
 	sys := &System{
 		rn: rn,
 	}
+	sys.Install("/bin/mkdir", nil, Root)
 	return sys
 }
 
@@ -44,20 +46,37 @@ func (me *System) dumprs(w io.Writer) {
 	me.mounts("/").Walk(rs.NodePrinter(w))
 }
 
+// install resource at the absolute path
+func (me *System) Install(abspath string, resource interface{}, acc *Account) (
+	*rs.Node, error,
+) {
+	dir, name := path.Split(abspath)
+	n, err := me.Stat(dir, acc)
+	if err != nil {
+		return nil, err
+	}
+	newNode := n.Make(name)
+	newNode.SetPerm(00755)
+	newNode.SetResource(resource)
+	newNode.UnsetMode(rs.ModeDir)
+	if resource != nil {
+
+	}
+	return newNode, nil
+}
+
 // Stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
 func (me *System) Stat(abspath string, acc *Account) (*rs.Node, error) {
-	root := me.mounts(abspath)
-	result := root.Locate(abspath)
-	n := result.Node
-	for {
-		if n.Child() == nil {
-			break
-		}
+	rn := me.mounts(abspath)
+	nodes, err := rn.Locate(abspath)
+	if err != nil {
+		return nil, err
+	}
+	for _, n := range nodes {
 		if err := acc.Permitted(OpExec, n.Seal()); err != nil {
 			return nil, fmt.Errorf("Stat %s uid:%d: %v", abspath, acc.uid, err)
 		}
-		n = n.Child()
 	}
-	return n, nil
+	return nodes[len(nodes)-1], nil
 }

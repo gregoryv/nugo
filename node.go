@@ -35,6 +35,8 @@ import (
 	"net/url"
 	"path"
 	"strings"
+
+	"github.com/gregoryv/fox"
 )
 
 // A NodeMode represents a node's mode and permission bits.
@@ -112,6 +114,14 @@ func (my *Node) SetGID(gid int) { my.gid = gid }
 func (my *Node) SetPerm(perm NodeMode) {
 	mode := my.mode &^ ModePerm // clear previous
 	my.mode = mode | perm
+}
+
+// SetResource of this node, use nil to clear
+func (my *Node) SetResource(r interface{}) { my.resource = r }
+
+// UnsetMode todo
+func (me *Node) UnsetMode(mask NodeMode) {
+	me.mode = me.mode &^ mask
 }
 
 // SetSeal sets ownership and permission mode of the this node.
@@ -210,6 +220,21 @@ func (me *Node) LastChild() *Node {
 	return last
 }
 
+// LeafChild returns the leaf child of the first child
+func (me *Node) LeafChild() *Node {
+	if me.child == nil {
+		return nil
+	}
+	last := me.child
+	for {
+		if last.child == nil {
+			break
+		}
+		last = last.child
+	}
+	return last
+}
+
 // Child returns child of this node.
 func (my *Node) Child() *Node { return my.child }
 
@@ -227,19 +252,6 @@ func (me *Node) DelChild(name string) *Node {
 	return me.delSibling(me.child, name)
 }
 
-// copy returns a copy of the given node
-func (me *Node) copy() *Node {
-	return &Node{
-		name:     me.name,
-		uid:      me.uid,
-		gid:      me.gid,
-		mode:     me.mode,
-		child:    me.child,
-		sibling:  me.sibling,
-		resource: me.resource,
-	}
-}
-
 func (me *Node) delSibling(c *Node, name string) *Node {
 	for {
 		sibling := c.sibling
@@ -253,6 +265,11 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 		c = sibling
 	}
 	return nil
+}
+
+// String todo
+func (me *Node) String() string {
+	return fmt.Sprintf("%s %s", me.Seal(), me.name)
 }
 
 // ----------------------------------------
@@ -294,26 +311,29 @@ func (me *RootNode) Find(abspath string) *Node {
 
 // Locate returns a new root node with each child set to the one
 // matching the abspath.
-func (me *RootNode) Locate(abspath string) *RootNode {
+func (me *RootNode) Locate(abspath string) ([]*Node, error) {
 	fullname := path.Clean(abspath)
-	newRoot := NewRootNode(me.name, me.mode)
-	newRoot.Node = me.Node.copy()
-
-	n := newRoot.Node
+	result := []*Node{me.Node}
+	if abspath == "/" {
+		return result, nil
+	}
+	var found bool
 	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
 		if parent == nil { // skip parent
 			return
 		}
 		if strings.Index(fullname, abspath) == 0 {
-			c := child.copy()
-			n.child = c
+			result = append(result, child)
 			if fullname == abspath {
+				found = true
 				w.Stop()
 			}
-			n = c
 		}
 	})
-	return newRoot
+	if !found {
+		return result, fmt.Errorf("Locate %s: not found", abspath)
+	}
+	return result, nil
 }
 
 // Walk over each node until Walker is stopped. Same as
@@ -365,5 +385,12 @@ func NamePrinter(w io.Writer) Visitor {
 func NodePrinter(w io.Writer) Visitor {
 	return func(parent, child *Node, abspath string, Walker *Walker) {
 		fmt.Fprintln(w, child.Seal().String(), abspath)
+	}
+}
+
+// NodeLogger logs permissions and ownership with each node
+func NodeLogger(l fox.Logger) Visitor {
+	return func(parent, child *Node, abspath string, Walker *Walker) {
+		l.Log(child.Seal().String(), abspath)
 	}
 }

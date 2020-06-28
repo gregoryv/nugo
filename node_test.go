@@ -1,47 +1,47 @@
 package rs
 
 import (
-	"bytes"
 	"fmt"
 	"os"
-	"reflect"
 	"testing"
+
+	"github.com/gregoryv/asserter"
 )
+
+func TestNode_SetResource(t *testing.T) {
+	var (
+		n = NewNode("val")
+	)
+	n.SetResource(1)
+	if n.resource.(int) != 1 {
+		t.Fail()
+	}
+}
 
 func TestRootNode_Locate_itself(t *testing.T) {
 	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	rn.SetSeal(1, 1, 01755)
 	rn.MakeAll("etc")
+	ok, bad := asserter.NewMixed(t)
 
-	b := rn.Locate("/")
-	if !reflect.DeepEqual(rn, b) {
-		t.Error("root node and Locate / are different")
-	}
-
-	if n := b.Child(); n.Name() != "etc" {
-		t.Error("child not etc")
-	}
+	ok(rn.Locate("/"))
+	bad(rn.Locate("/ljlj"))
 }
 
 func TestRootNode_Locate(t *testing.T) {
 	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	rn.SetSeal(1, 1, 01755)
-	rn.MakeAll("etc")
+	bin := rn.Make("bin")
+	rn.Make("etc")
+	bin.Make("mkdir")
 
-	a := rn.Find("/etc")
-	b := rn.Locate("/etc")
-	if reflect.DeepEqual(a, b) {
-		t.Error("equal")
+	b, err := rn.Locate("/bin/mkdir")
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	var abuf bytes.Buffer
-	rn.Walk(NodePrinter(&abuf))
-
-	var bbuf bytes.Buffer
-	b.Walk(NodePrinter(&bbuf))
-
-	if abuf.String() != bbuf.String() {
-		t.Error("not same")
+	got := b[len(b)-1].Name()
+	if got != "mkdir" {
+		rn.Walk(NodeLogger(t))
+		t.Fail()
 	}
 }
 
@@ -50,12 +50,13 @@ func ExampleRootNode_Locate() {
 	root.SetSeal(1, 1, 01755)
 	root.MakeAll("etc", "tmp")
 
-	n := root.Locate("/etc")
-	n.Walk(NodePrinter(os.Stdout))
+	nodes, _ := root.Locate("/etc")
+	for _, node := range nodes {
+		fmt.Println(node)
+	}
 	// output:
 	// d--xrwxr-xr-x 1 1 /
-	// d--xrwxr-xr-x 1 1 /etc
-	// d--xrwxr-xr-x 1 1 /tmp
+	// d--xrwxr-xr-x 1 1 etc
 }
 
 func ExampleNodePrinter() {

@@ -13,6 +13,7 @@ func ExampleNewSystem() {
 	// output:
 	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 /bin
+	// ----rwxr-xr-x 1 1 /bin/mkdir
 	// d---rwxr-xr-x 1 1 /etc
 	// d---rwxr-xr-x 1 1 /etc/accounts
 }
@@ -34,4 +35,15 @@ func TestSystem_Stat(t *testing.T) {
 	ok(Stat("/", Anonymous))
 	ok(Stat("/bin", Anonymous))
 	bad(Stat("/etc", Anonymous))
+	bad(Stat("/etc/nothing", Root))
+}
+
+func xTestSystem_Install(t *testing.T) {
+	var (
+		sys     = NewSystem()
+		Install = sys.Install
+		ok, bad = asserter.NewMixed(t)
+	)
+	ok(Install("/bin/x", nil, Root))
+	bad(Install("/bin/x", nil, Anonymous))
 }
