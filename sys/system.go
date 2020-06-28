@@ -23,7 +23,7 @@ func NewSystem() *System {
 	sys := &System{
 		rn: rn,
 	}
-	sys.Install("/bin/mkdir", nil, Root)
+	sys.Install("/bin/mkdir", nil, Root, 00755)
 	return sys
 }
 
@@ -47,7 +47,9 @@ func (me *System) dumprs(w io.Writer) {
 }
 
 // install resource at the absolute path
-func (me *System) Install(abspath string, resource interface{}, acc *Account) (
+func (me *System) Install(
+	abspath string, resource interface{}, acc *Account, perm rs.NodeMode,
+) (
 	*rs.Node, error,
 ) {
 	dir, name := path.Split(abspath)
@@ -55,8 +57,11 @@ func (me *System) Install(abspath string, resource interface{}, acc *Account) (
 	if err != nil {
 		return nil, err
 	}
+	if err := acc.Permitted(OpWrite, n.Seal()); err != nil {
+		return nil, fmt.Errorf("Install: %v", err)
+	}
 	newNode := n.Make(name)
-	newNode.SetPerm(00755)
+	newNode.SetPerm(perm)
 	newNode.SetResource(resource)
 	newNode.UnsetMode(rs.ModeDir)
 	if resource != nil {

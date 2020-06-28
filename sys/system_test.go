@@ -38,12 +38,13 @@ func TestSystem_Stat(t *testing.T) {
 	bad(Stat("/etc/nothing", Root))
 }
 
-func xTestSystem_Install(t *testing.T) {
+func TestSystem_Install(t *testing.T) {
 	var (
 		sys     = NewSystem()
 		Install = sys.Install
 		ok, bad = asserter.NewMixed(t)
 	)
-	ok(Install("/bin/x", nil, Root))
-	bad(Install("/bin/x", nil, Anonymous))
+	ok(Install("/bin/x", nil, Root, 0))
+	bad(Install("/bin/nosuchdir/x", nil, Root, 0))
+	bad(Install("/bin/x", nil, Anonymous, 0))
 }
