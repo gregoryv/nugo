@@ -17,6 +17,10 @@ func TestRootNode_Locate_itself(t *testing.T) {
 	if !reflect.DeepEqual(rn, b) {
 		t.Error("root node and Locate / are different")
 	}
+
+	if n := b.Child(); n.Name() != "etc" {
+		t.Error("child not etc")
+	}
 }
 
 func TestRootNode_Locate(t *testing.T) {

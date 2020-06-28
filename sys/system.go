@@ -19,9 +19,10 @@ func NewSystem() *System {
 	etc.SetPerm(00755)
 	etc.Make("accounts")
 
-	return &System{
+	sys := &System{
 		rn: rn,
 	}
+	return sys
 }
 
 type System struct {
