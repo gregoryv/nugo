@@ -1,9 +1,45 @@
 package rs
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"reflect"
+	"testing"
 )
+
+func TestRootNode_Locate_itself(t *testing.T) {
+	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	rn.SetSeal(1, 1, 01755)
+	rn.MakeAll("etc")
+
+	b := rn.Locate("/")
+	if !reflect.DeepEqual(rn, b) {
+		t.Error("root node and Locate / are different")
+	}
+}
+
+func TestRootNode_Locate(t *testing.T) {
+	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	rn.SetSeal(1, 1, 01755)
+	rn.MakeAll("etc")
+
+	a := rn.Find("/etc")
+	b := rn.Locate("/etc")
+	if reflect.DeepEqual(a, b) {
+		t.Error("equal")
+	}
+
+	var abuf bytes.Buffer
+	rn.Walk(NodePrinter(&abuf))
+
+	var bbuf bytes.Buffer
+	b.Walk(NodePrinter(&bbuf))
+
+	if abuf.String() != bbuf.String() {
+		t.Error("not same")
+	}
+}
 
 func ExampleRootNode_Locate() {
 	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
@@ -15,6 +51,7 @@ func ExampleRootNode_Locate() {
 	// output:
 	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 /etc
+	// d--xrwxr-xr-x 1 1 /tmp
 }
 
 func ExampleNodePrinter() {

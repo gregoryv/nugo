@@ -99,7 +99,7 @@ func (my *Node) Name() string { return my.name }
 
 // Seal returns the access control seal of this node.
 func (my *Node) Seal() *Seal {
-	return &Seal{uid: my.uid, gid: my.gid, perm: my.mode}
+	return &Seal{UID: my.uid, GID: my.gid, Mode: my.mode}
 }
 
 // SetUID sets the owner id of this node.
@@ -210,6 +210,9 @@ func (me *Node) LastChild() *Node {
 	return last
 }
 
+// Child returns child of this node.
+func (my *Node) Child() *Node { return my.child }
+
 // DelChild removes the first child with the given name and returns the
 // removed node
 func (me *Node) DelChild(name string) *Node {
@@ -289,7 +292,8 @@ func (me *RootNode) Find(abspath string) *Node {
 	return n
 }
 
-// Locate returns a new root node with each child set.
+// Locate returns a new root node with each child set to the one
+// matching the abspath.
 func (me *RootNode) Locate(abspath string) *RootNode {
 	fullname := path.Clean(abspath)
 	newRoot := NewRootNode(me.name, me.mode)

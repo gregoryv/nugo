@@ -7,11 +7,11 @@ type Sealed interface {
 }
 
 type Seal struct {
-	uid  int // owner
-	gid  int // group
-	perm NodeMode
+	UID  int // owner
+	GID  int // group
+	Mode NodeMode
 }
 
 func (l Seal) String() string {
-	return fmt.Sprintf("%s %d %d", l.perm.String(), l.uid, l.gid)
+	return fmt.Sprintf("%s %d %d", l.Mode.String(), l.UID, l.GID)
 }

@@ -1,6 +1,18 @@
 package sys
 
-import "sync"
+import (
+	"errors"
+	"fmt"
+	"sync"
+
+	"github.com/gregoryv/fox"
+	"github.com/gregoryv/rs"
+)
+
+var (
+	Anonymous = NewAccount("anonymous", 0)
+	Root      = NewAccount("root", 1)
+)
 
 // NewAccount returns a new account with the given uid as both uid and
 // group id.
@@ -18,6 +30,8 @@ type Account struct {
 
 	mu     sync.Mutex
 	groups []int
+
+	debug fox.Logger
 }
 
 func (me *Account) AddGroup(gid int) {
@@ -43,3 +57,32 @@ func (me *Account) DelGroup(gid int) {
 }
 
 func (me *Account) owns(id int) bool { return me.uid == id }
+
+// Permitted returns error if account does not have operation
+// permission to the given seal.
+func (my *Account) Permitted(op Operation, seal *rs.Seal) error {
+	if my.uid == Root.uid {
+		return nil
+	}
+	n, u, g, o := op.Modes()
+	switch {
+	case my.uid == 0 && (seal.Mode&n == n): // anonymous
+	case my.uid == seal.UID && (seal.Mode&u == u): // owner
+	case my.member(seal.GID) && (seal.Mode&g == g): // group
+	case my.uid > 0 && seal.Mode&o == o: // other
+	default:
+		return fmt.Errorf("%v %v denied", seal, op)
+	}
+	return nil
+}
+
+var ErrPermissionDenied = errors.New("permission denied")
+
+func (my *Account) member(gid int) bool {
+	for _, id := range my.groups {
+		if id == gid {
+			return true
+		}
+	}
+	return false
+}
