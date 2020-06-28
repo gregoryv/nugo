@@ -220,21 +220,6 @@ func (me *Node) LastChild() *Node {
 	return last
 }
 
-// LeafChild returns the leaf child of the first child
-func (me *Node) LeafChild() *Node {
-	if me.child == nil {
-		return nil
-	}
-	last := me.child
-	for {
-		if last.child == nil {
-			break
-		}
-		last = last.child
-	}
-	return last
-}
-
 // Child returns child of this node.
 func (my *Node) Child() *Node { return my.child }
 
