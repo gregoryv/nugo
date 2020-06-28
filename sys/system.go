@@ -17,18 +17,12 @@ func NewSystem() *System {
 	rn.SetSeal(1, 1, 01755)
 	rn.Make("bin")
 
-	sys := &System{
-		rn: rn,
-	}
-	sys.Install("/bin/mkdir", &MkdirCmd{}, Root, 00755)
+	sys := &System{rn: rn}
+	sys.Install("/bin/mkdir", &MkdirCmd{sys: sys}, Root, 00755)
 
-	// todo use mkdir to create subsequent directories
-	// Root.Exec("/bin/mkdir", &Mkdir{
-	//    Abspath: "/etc",
-	//    Mode: 00755,
-	// })
-	etc := rn.Make("etc")
-	etc.SetPerm(00755)
+	cmd := NewCmd("/bin/mkdir", "-m", "00755", "/etc")
+	cmd.Run(sys, Root)
+	etc, _ := sys.Stat("/etc", Root)
 	etc.Make("accounts")
 
 	return sys
@@ -36,6 +30,26 @@ func NewSystem() *System {
 
 type System struct {
 	rn *rs.RootNode
+}
+
+// Exec executes the given command as the account. Fails if
+// e.g. resource is not Executable.
+func (me *System) Exec(cmd *Cmd, acc *Account) error {
+	n, err := me.Stat(cmd.abspath, acc)
+	if err != nil {
+		return err
+	}
+	switch r := n.Resource().(type) {
+	case Executable:
+		// If needed setuid can be checked and enforced here
+		return r.Exec(cmd, acc)
+	default:
+		return fmt.Errorf("Cannot run %T", r)
+	}
+}
+
+type Executable interface {
+	Exec(*Cmd, *Account) error
 }
 
 // mounts returns the mounting point of the abspath. Currently only
@@ -108,20 +122,17 @@ func (me *System) Mkdir(abspath string, mode rs.NodeMode, acc *Account) (*rs.Nod
 	return newNode, nil
 }
 
-type MkdirCmd struct{}
+type MkdirCmd struct {
+	sys *System
+}
 
-func (me *MkdirCmd) Exec(c *Command, args ...string) error {
+func (me *MkdirCmd) Exec(c *Cmd, acc *Account) error {
 	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
 	mode := flags.Uint("m", 00755, "mode for new directory")
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse(c.args); err != nil {
 		return err
 	}
 	abspath := flags.Arg(0)
-	_, err := c.sys.Mkdir(abspath, rs.NodeMode(*mode), c.acc)
+	_, err := me.sys.Mkdir(abspath, rs.NodeMode(*mode), acc)
 	return err
-}
-
-type Command struct {
-	sys *System
-	acc *Account
 }

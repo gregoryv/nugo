@@ -99,6 +99,9 @@ type Node struct {
 // Name returns the base name of a node
 func (my *Node) Name() string { return my.name }
 
+// Resource returns the nodes resource or nil if none is set
+func (my *Node) Resource() interface{} { return my.resource }
+
 // Seal returns the access control seal of this node.
 func (my *Node) Seal() *Seal {
 	return &Seal{UID: my.uid, GID: my.gid, Mode: my.mode}
