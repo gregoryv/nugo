@@ -8,6 +8,19 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func ExampleNode_UnsetMode() {
+	var (
+		n = NewNode("node")
+	)
+	n.mode = ModeDir | 01755
+	fmt.Println(n)
+	n.UnsetMode(ModeDir)
+	fmt.Println(n)
+	// output:
+	// d--xrwxr-xr-x 0 0 node
+	// ---xrwxr-xr-x 0 0 node
+}
+
 func TestNode_SetResource(t *testing.T) {
 	var (
 		n = NewNode("val")
