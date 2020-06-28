@@ -391,6 +391,6 @@ func NodePrinter(w io.Writer) Visitor {
 // NodeLogger logs permissions and ownership with each node
 func NodeLogger(l fox.Logger) Visitor {
 	return func(parent, child *Node, abspath string, Walker *Walker) {
-		l.Log(child.Seal().String(), abspath)
+		l.Log(fmt.Sprintf("%s %s", child.Seal().String(), abspath))
 	}
 }
