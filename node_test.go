@@ -9,6 +9,15 @@ import (
 	"github.com/gregoryv/fox"
 )
 
+func TestRootNode_Child(t *testing.T) {
+	var (
+		rn = NewRootNode("/", ModeDir)
+	)
+	if n := rn.Child(); n != nil {
+		t.Fail()
+	}
+}
+
 func ExampleNode_UnsetMode() {
 	var (
 		n = NewNode("node")
