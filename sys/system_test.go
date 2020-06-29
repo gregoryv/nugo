@@ -18,6 +18,24 @@ func ExampleNewSystem() {
 	// d---rwxr-xr-x 1 1 /etc/accounts
 }
 
+func TestSystem_Exec(t *testing.T) {
+	var (
+		sys     = NewSystem()
+		Exec    = sys.Exec
+		ok, bad = asserter.NewErrors(t)
+	)
+	ok(Exec(NewCmd("/bin/mkdir", "/tmp"), Root))
+
+	// Node not found
+	bad(Exec(NewCmd("/bin/nosuch/mkdir", "/tmp"), Root))
+
+	// Resource not type Executable
+	bad(Exec(NewCmd("/bin"), Root))
+
+	// Bad flag
+	bad(Exec(NewCmd("/bin/mkdir", "-nosuch"), Root))
+}
+
 func ExampleSystem_Stat() {
 	sys := NewSystem()
 	_, err := sys.Stat("/etc/accounts", Anonymous)
@@ -47,15 +65,4 @@ func TestSystem_Install(t *testing.T) {
 	ok(Install("/bin/x", nil, Root, 0))
 	bad(Install("/bin/nosuchdir/x", nil, Root, 0))
 	bad(Install("/bin/x", nil, Anonymous, 0))
-}
-
-func TestSystem_Mkdir(t *testing.T) {
-	var (
-		sys     = NewSystem()
-		Mkdir   = sys.Mkdir
-		ok, bad = asserter.NewMixed(t)
-	)
-	bad(Mkdir("/nosuch/whatever", 0, Root))
-	bad(Mkdir("/whatever", 0, Anonymous))
-	ok(Mkdir("/whatever", 0, Root))
 }

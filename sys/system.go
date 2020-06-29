@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"path"
@@ -18,13 +17,16 @@ func NewSystem() *System {
 	rn.Make("bin")
 
 	sys := &System{rn: rn}
-	sys.Install("/bin/mkdir", &MkdirCmd{sys: sys}, Root, 00755)
+	sys.Install("/bin/mkdir", &mkdirCmd{}, Root, 00755)
 
-	cmd := NewCmd("/bin/mkdir", "-m", "00755", "/etc")
-	cmd.Run(sys, Root)
-	etc, _ := sys.Stat("/etc", Root)
-	etc.Make("accounts")
-
+	// Order is important until mkdir supports -p flag
+	dirs := []string{
+		"/etc",
+		"/etc/accounts",
+	}
+	for _, dir := range dirs {
+		sys.Exec(NewCmd("/bin/mkdir", "-m", "00755", dir), Root)
+	}
 	return sys
 }
 
@@ -35,21 +37,22 @@ type System struct {
 // Exec executes the given command as the account. Fails if
 // e.g. resource is not Executable.
 func (me *System) Exec(cmd *Cmd, acc *Account) error {
-	n, err := me.Stat(cmd.abspath, acc)
+	n, err := me.Stat(cmd.Abspath, acc)
 	if err != nil {
 		return err
 	}
 	switch r := n.Resource().(type) {
 	case Executable:
 		// If needed setuid can be checked and enforced here
-		return r.Exec(cmd, acc)
+		cmd.Sys = &Syscall{acc: acc, sys: me}
+		return r.Exec(cmd)
 	default:
 		return fmt.Errorf("Cannot run %T", r)
 	}
 }
 
 type Executable interface {
-	Exec(*Cmd, *Account) error
+	Exec(*Cmd) error
 }
 
 // mounts returns the mounting point of the abspath. Currently only
@@ -105,34 +108,4 @@ func (me *System) Stat(abspath string, acc *Account) (*rs.Node, error) {
 		}
 	}
 	return nodes[len(nodes)-1], nil
-}
-
-// Mkdir creates the director given by abspath
-func (me *System) Mkdir(abspath string, mode rs.NodeMode, acc *Account) (*rs.Node, error) {
-	dir, name := path.Split(abspath)
-	n, err := me.Stat(dir, acc)
-	if err != nil {
-		return nil, fmt.Errorf("Mkdir: %w", err)
-	}
-	if err := acc.Permitted(OpWrite, n.Seal()); err != nil {
-		return nil, fmt.Errorf("Mkdir: %w", err)
-	}
-	newNode := n.Make(name)
-	newNode.SetPerm(mode)
-	return newNode, nil
-}
-
-type MkdirCmd struct {
-	sys *System
-}
-
-func (me *MkdirCmd) Exec(c *Cmd, acc *Account) error {
-	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
-	mode := flags.Uint("m", 00755, "mode for new directory")
-	if err := flags.Parse(c.args); err != nil {
-		return err
-	}
-	abspath := flags.Arg(0)
-	_, err := me.sys.Mkdir(abspath, rs.NodeMode(*mode), acc)
-	return err
 }
