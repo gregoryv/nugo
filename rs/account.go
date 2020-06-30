@@ -16,17 +16,17 @@ var (
 
 // NewAccount returns a new account with the given uid as both uid and
 // group id.
-func NewAccount(username string, uid int) *Account {
+func NewAccount(name string, uid int) *Account {
 	return &Account{
-		username: username,
-		uid:      uid,
-		groups:   []int{uid},
+		name:   name,
+		uid:    uid,
+		groups: []int{uid},
 	}
 }
 
 type Account struct {
-	username string
-	uid      int
+	name string
+	uid  int
 
 	mu     sync.Mutex
 	groups []int
