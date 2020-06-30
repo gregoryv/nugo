@@ -1,6 +1,6 @@
 /*
 
-Package nugo provides a node graph with unix style modes for access control.
+Package nugo provides a graph with unix style modes.
 
 The graph is a set of linked nodes
 
@@ -126,6 +126,9 @@ func (my *Node) SetPerm(perm NodeMode) {
 // SetResource of this node, use nil to clear
 func (my *Node) SetResource(r interface{}) { my.resource = r }
 
+// IsDir returns true if ModeDir is set
+func (me *Node) IsDir() bool { return me.mode&ModeDir != 0 }
+
 // UnsetMode todo
 func (me *Node) UnsetMode(mask NodeMode) {
 	me.mode = me.mode &^ mask
@@ -239,7 +242,7 @@ func (my *Node) Child() *Node { return my.child }
 // removed node
 func (me *Node) DelChild(name string) *Node {
 	mu.Lock()
-	n :=me.delChild(name)
+	n := me.delChild(name)
 	mu.Unlock()
 	return n
 }

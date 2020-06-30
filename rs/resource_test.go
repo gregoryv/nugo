@@ -1,6 +1,10 @@
 package rs
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gregoryv/asserter"
+)
 
 func TestResInfo_Name(t *testing.T) {
 	var (
@@ -9,4 +13,15 @@ func TestResInfo_Name(t *testing.T) {
 	if rif.Name() != "/" {
 		t.Error("name failed")
 	}
+}
+
+func TestResInfo_IsDir(t *testing.T) {
+	var (
+		asRoot  = NewSystem().Use(Root)
+		dir, _  = asRoot.Stat("/")
+		file, _ = asRoot.Stat("/bin/mkdir")
+		ok, bad = asserter.NewErrors(t)
+	)
+	ok(dir.IsDir())
+	bad(file.IsDir())
 }

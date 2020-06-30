@@ -9,6 +9,29 @@ import (
 	"github.com/gregoryv/fox"
 )
 
+func TestNode_Resource(t *testing.T) {
+	var (
+		n = &Node{}
+	)
+	if n.Resource() != nil {
+		t.Fail()
+	}
+	n.SetResource(1)
+	if n.Resource() == nil {
+		t.Fail()
+	}
+}
+
+func TestNode_IsDir(t *testing.T) {
+	var (
+		file   = &Node{}
+		dir    = &Node{mode: ModeDir}
+		assert = asserter.New(t)
+	)
+	assert(!file.IsDir())
+	assert(dir.IsDir())
+}
+
 func TestRootNode_Child(t *testing.T) {
 	var (
 		rn = NewRootNode("/", ModeDir)
