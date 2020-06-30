@@ -1,4 +1,4 @@
-package sys
+package nugo
 
 import "github.com/gregoryv/rs"
 
