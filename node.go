@@ -35,9 +35,13 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/gregoryv/fox"
 )
+
+// Mutex for synchronizing all write and delete operations.
+var mu sync.Mutex
 
 // A NodeMode represents a node's mode and permission bits.
 type NodeMode uint32
@@ -144,19 +148,24 @@ func (me *Node) Make(name string) *Node {
 }
 
 // MakeAll creates and adds the named children
-func (me *Node) MakeAll(names ...string) {
-	for _, name := range names {
-		me.Make(name)
+func (me *Node) MakeAll(names ...string) []*Node {
+	nodes := make([]*Node, len(names))
+	for i, name := range names {
+		nodes[i] = me.Make(name)
 	}
+	return nodes
 }
 
 // Add adds each child in sequence according to the NodeMode of the
-// parent node.
+// parent node. Add blocks if another add is in progress.
+// For ModeDistinct an existing node with the same name is replaced.
 func (me *Node) Add(children ...*Node) {
+	mu.Lock()
+	defer mu.Unlock()
 	for _, n := range children {
 		n.mode = me.mode
 		if n.mode&ModeDistinct == ModeDistinct {
-			me.DelChild(n.Name())
+			me.delChild(n.Name())
 		}
 		switch {
 		case n.mode&ModeSort == ModeSort:
@@ -229,6 +238,13 @@ func (my *Node) Child() *Node { return my.child }
 // DelChild removes the first child with the given name and returns the
 // removed node
 func (me *Node) DelChild(name string) *Node {
+	mu.Lock()
+	n :=me.delChild(name)
+	mu.Unlock()
+	return n
+}
+
+func (me *Node) delChild(name string) *Node {
 	if me.child == nil {
 		return nil
 	}
