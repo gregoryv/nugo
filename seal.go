@@ -1,4 +1,4 @@
-package rs
+package nugo
 
 import "fmt"
 

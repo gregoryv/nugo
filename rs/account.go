@@ -1,4 +1,4 @@
-package nugo
+package rs
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gregoryv/fox"
-	"github.com/gregoryv/rs"
+	"github.com/gregoryv/nugo"
 )
 
 var (
@@ -60,7 +60,7 @@ func (me *Account) owns(id int) bool { return me.uid == id }
 
 // Permitted returns error if account does not have operation
 // permission to the given seal.
-func (my *Account) Permitted(op Operation, seal *rs.Seal) error {
+func (my *Account) Permitted(op Operation, seal *nugo.Seal) error {
 	if my.uid == Root.uid {
 		return nil
 	}

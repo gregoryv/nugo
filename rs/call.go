@@ -1,10 +1,10 @@
-package nugo
+package rs
 
 import (
 	"fmt"
 	"path"
 
-	"github.com/gregoryv/rs"
+	"github.com/gregoryv/nugo"
 )
 
 type Syscall struct {
@@ -14,9 +14,9 @@ type Syscall struct {
 
 // install resource at the absolute path
 func (me *Syscall) Install(
-	abspath string, resource interface{}, mode rs.NodeMode,
+	abspath string, resource interface{}, mode nugo.NodeMode,
 ) (
-	*rs.Node, error,
+	*nugo.Node, error,
 ) {
 	dir, name := path.Split(abspath)
 	n, err := me.Stat(dir)
@@ -29,7 +29,7 @@ func (me *Syscall) Install(
 	newNode := n.Make(name)
 	newNode.SetPerm(mode)
 	newNode.SetResource(resource)
-	newNode.UnsetMode(rs.ModeDir)
+	newNode.UnsetMode(nugo.ModeDir)
 	if resource != nil {
 
 	}
@@ -59,7 +59,7 @@ type Executable interface {
 
 // Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) Mkdir(abspath string, mode rs.NodeMode) (*rs.Node, error) {
+func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.Stat(dir)
 	if err != nil {
@@ -75,7 +75,7 @@ func (me *Syscall) Mkdir(abspath string, mode rs.NodeMode) (*rs.Node, error) {
 
 // Stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
-func (me *Syscall) Stat(abspath string) (*rs.Node, error) {
+func (me *Syscall) Stat(abspath string) (*nugo.Node, error) {
 	rn := me.mounts(abspath)
 	nodes, err := rn.Locate(abspath)
 	if err != nil {

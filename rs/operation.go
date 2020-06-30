@@ -1,6 +1,6 @@
-package nugo
+package rs
 
-import "github.com/gregoryv/rs"
+import "github.com/gregoryv/nugo"
 
 type Operation uint
 
@@ -11,7 +11,7 @@ const (
 )
 
 // Modes
-func (me Operation) Modes() (n, u, g, o rs.NodeMode) {
+func (me Operation) Modes() (n, u, g, o nugo.NodeMode) {
 	switch me {
 	case OpRead:
 		return 04000, 00400, 00040, 00004

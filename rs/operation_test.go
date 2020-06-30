@@ -1,10 +1,10 @@
-package nugo
+package rs
 
 import (
 	"testing"
 
 	"github.com/gregoryv/asserter"
-	"github.com/gregoryv/rs"
+	"github.com/gregoryv/nugo"
 )
 
 func TestOperation_String(t *testing.T) {
@@ -18,7 +18,7 @@ func TestOperation_String(t *testing.T) {
 }
 
 func TestOperation_Modes(t *testing.T) {
-	ok := func(n, u, g, o rs.NodeMode) {
+	ok := func(n, u, g, o nugo.NodeMode) {
 		t.Helper()
 		assert := asserter.New(t)
 		assert(n != u).Error("anonymous eq user")

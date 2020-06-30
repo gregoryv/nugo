@@ -1,10 +1,10 @@
-package nugo
+package rs
 
 import (
 	"flag"
 	"io/ioutil"
 
-	"github.com/gregoryv/rs"
+	"github.com/gregoryv/nugo"
 )
 
 // NewCmd returns a new command.
@@ -33,6 +33,6 @@ func (me *mkdirCmd) Exec(c *Cmd) error {
 		return err
 	}
 	abspath := flags.Arg(0)
-	_, err := c.Sys.Mkdir(abspath, rs.NodeMode(*mode))
+	_, err := c.Sys.Mkdir(abspath, nugo.NodeMode(*mode))
 	return err
 }

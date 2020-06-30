@@ -1,10 +1,10 @@
-package nugo
+package rs
 
 import (
 	"testing"
 
 	"github.com/gregoryv/asserter"
-	"github.com/gregoryv/rs"
+	"github.com/gregoryv/nugo"
 )
 
 func TestAccount_AddGroup(t *testing.T) {
@@ -37,12 +37,12 @@ func TestAccount_PermittedAnonymous(t *testing.T) {
 		ok, bad = asserter.NewErrors(t)
 		perm    = Anonymous.Permitted
 	)
-	ok(perm(OpRead, &rs.Seal{1, 1, 07000}))
-	ok(perm(OpRead, &rs.Seal{1, 1, 04000}))
-	ok(perm(OpWrite, &rs.Seal{1, 1, 02000}))
-	ok(perm(OpExec, &rs.Seal{1, 1, 01000}))
-	bad(perm(OpExec, &rs.Seal{1, 1, 02000}))
-	bad(perm(OpExec, &rs.Seal{1, 1, 00000}))
+	ok(perm(OpRead, &nugo.Seal{1, 1, 07000}))
+	ok(perm(OpRead, &nugo.Seal{1, 1, 04000}))
+	ok(perm(OpWrite, &nugo.Seal{1, 1, 02000}))
+	ok(perm(OpExec, &nugo.Seal{1, 1, 01000}))
+	bad(perm(OpExec, &nugo.Seal{1, 1, 02000}))
+	bad(perm(OpExec, &nugo.Seal{1, 1, 00000}))
 }
 
 func TestAccount_PermittedRoot(t *testing.T) {
@@ -51,9 +51,9 @@ func TestAccount_PermittedRoot(t *testing.T) {
 		perm  = Root.Permitted
 	)
 	// root is special in that it always has full access
-	ok(perm(OpRead, &rs.Seal{1, 1, 00000}))
-	ok(perm(OpWrite, &rs.Seal{1, 2, 00000}))
-	ok(perm(OpExec, &rs.Seal{0, 0, 00000}))
+	ok(perm(OpRead, &nugo.Seal{1, 1, 00000}))
+	ok(perm(OpWrite, &nugo.Seal{1, 2, 00000}))
+	ok(perm(OpExec, &nugo.Seal{0, 0, 00000}))
 }
 
 func TestAccount_PermittedOther(t *testing.T) {
@@ -62,7 +62,7 @@ func TestAccount_PermittedOther(t *testing.T) {
 		perm  = NewAccount("john", 2).Permitted
 	)
 	// root is special in that it always has full access
-	ok(perm(OpRead, &rs.Seal{2, 2, 00400}))
-	ok(perm(OpRead, &rs.Seal{3, 2, 00040}))
-	ok(perm(OpRead, &rs.Seal{1, 1, 00004}))
+	ok(perm(OpRead, &nugo.Seal{2, 2, 00400}))
+	ok(perm(OpRead, &nugo.Seal{3, 2, 00040}))
+	ok(perm(OpRead, &nugo.Seal{1, 1, 00004}))
 }
