@@ -1,6 +1,6 @@
 /*
 
-Package nugo provides a resource system with unix style access control.
+Package nugo provides a node graph with unix style modes for access control.
 
 The graph is a set of linked nodes
 

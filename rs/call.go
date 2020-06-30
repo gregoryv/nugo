@@ -19,25 +19,30 @@ func (me *Syscall) Install(
 	*nugo.Node, error,
 ) {
 	dir, name := path.Split(abspath)
-	n, err := me.Stat(dir)
+	parent, err := me.Stat(dir)
 	if err != nil {
 		return nil, err
 	}
-	if err := me.acc.Permitted(OpWrite, n.Seal()); err != nil {
+	if err := me.acc.Permitted(OpWrite, parent.Seal()); err != nil {
 		return nil, fmt.Errorf("Install: %v", err)
 	}
-	newNode := n.Make(name)
-	newNode.SetPerm(mode)
-	newNode.SetResource(resource)
-	newNode.UnsetMode(nugo.ModeDir)
+	node := parent.Make(name)
+	node.SetPerm(mode)
+	node.SetResource(resource)
+	node.UnsetMode(nugo.ModeDir)
 	if resource != nil {
 
 	}
-	return newNode, nil
+	return node, nil
 }
 
-// Exec executes the given command as the account. Fails if
-// e.g. resource is not Executable.
+// ExecCmd creates and executes a new command with system defaults.
+func (me *Syscall) ExecCmd(abspath string, args ...string) error {
+	return me.Exec(NewCmd(abspath, args...))
+}
+
+// Exec executes the given command. Fails if e.g. resource is not
+// Executable.
 func (me *Syscall) Exec(cmd *Cmd) error {
 	n, err := me.Stat(cmd.Abspath)
 	if err != nil {

@@ -1,3 +1,6 @@
+/*
+Package rs provides a resource system which enforces unix style access control.
+*/
 package rs
 
 import (
@@ -31,6 +34,11 @@ func NewSystem() *System {
 
 type System struct {
 	rn *nugo.RootNode
+}
+
+// Use returns a syscall for the given account
+func (me *System) Use(acc *Account) *Syscall {
+	return &Syscall{System: me, acc: acc}
 }
 
 // mounts returns the mounting point of the abspath. Currently only
