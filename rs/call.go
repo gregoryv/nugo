@@ -23,7 +23,7 @@ func (me *Syscall) Install(
 	if err != nil {
 		return nil, err
 	}
-	if err := me.acc.Permitted(OpWrite, parent.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent.Seal()); err != nil {
 		return nil, fmt.Errorf("Install: %v", err)
 	}
 	node := parent.Make(name)
@@ -70,7 +70,7 @@ func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error)
 	if err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
-	if err := me.acc.Permitted(OpWrite, parent.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent.Seal()); err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
 	node := parent.Make(name)
@@ -97,7 +97,7 @@ func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 		return nil, err
 	}
 	for _, n := range nodes {
-		if err := me.acc.Permitted(OpExec, n.Seal()); err != nil {
+		if err := me.acc.permitted(OpExec, n.Seal()); err != nil {
 			return nil, fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
 		}
 	}

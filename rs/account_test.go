@@ -32,10 +32,10 @@ func TestAccount_owns(t *testing.T) {
 	}
 }
 
-func TestAccount_PermittedAnonymous(t *testing.T) {
+func TestAccount_permittedAnonymous(t *testing.T) {
 	var (
 		ok, bad = asserter.NewErrors(t)
-		perm    = Anonymous.Permitted
+		perm    = Anonymous.permitted
 	)
 	ok(perm(OpRead, &nugo.Seal{1, 1, 07000}))
 	ok(perm(OpRead, &nugo.Seal{1, 1, 04000}))
@@ -45,10 +45,10 @@ func TestAccount_PermittedAnonymous(t *testing.T) {
 	bad(perm(OpExec, &nugo.Seal{1, 1, 00000}))
 }
 
-func TestAccount_PermittedRoot(t *testing.T) {
+func TestAccount_permittedRoot(t *testing.T) {
 	var (
 		ok, _ = asserter.NewErrors(t)
-		perm  = Root.Permitted
+		perm  = Root.permitted
 	)
 	// root is special in that it always has full access
 	ok(perm(OpRead, &nugo.Seal{1, 1, 00000}))
@@ -56,10 +56,10 @@ func TestAccount_PermittedRoot(t *testing.T) {
 	ok(perm(OpExec, &nugo.Seal{0, 0, 00000}))
 }
 
-func TestAccount_PermittedOther(t *testing.T) {
+func TestAccount_permittedOther(t *testing.T) {
 	var (
 		ok, _ = asserter.NewErrors(t)
-		perm  = NewAccount("john", 2).Permitted
+		perm  = NewAccount("john", 2).permitted
 	)
 	// root is special in that it always has full access
 	ok(perm(OpRead, &nugo.Seal{2, 2, 00400}))

@@ -58,9 +58,9 @@ func (me *Account) DelGroup(gid int) {
 
 func (me *Account) owns(id int) bool { return me.uid == id }
 
-// Permitted returns error if account does not have operation
+// permitted returns error if account does not have operation
 // permission to the given seal.
-func (my *Account) Permitted(op operation, seal *nugo.Seal) error {
+func (my *Account) permitted(op operation, seal *nugo.Seal) error {
 	if my.uid == Root.uid {
 		return nil
 	}
