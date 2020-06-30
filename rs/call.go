@@ -19,7 +19,7 @@ func (me *Syscall) Install(
 	*nugo.Node, error,
 ) {
 	dir, name := path.Split(abspath)
-	parent, err := me.Stat(dir)
+	parent, err := me.stat(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (me *Syscall) ExecCmd(abspath string, args ...string) error {
 // Exec executes the given command. Fails if e.g. resource is not
 // Executable.
 func (me *Syscall) Exec(cmd *Cmd) error {
-	n, err := me.Stat(cmd.Abspath)
+	n, err := me.stat(cmd.Abspath)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ type Executable interface {
 // must exist.
 func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error) {
 	dir, name := path.Split(abspath)
-	parent, err := me.Stat(dir)
+	parent, err := me.stat(dir)
 	if err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
@@ -80,7 +80,17 @@ func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error)
 
 // Stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
-func (me *Syscall) Stat(abspath string) (*nugo.Node, error) {
+func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
+	n, err := me.stat(abspath)
+	if err != nil {
+		return nil, fmt.Errorf("Stat %v", err)
+	}
+	return &ResInfo{node: n}, nil
+}
+
+// stat returns the node of the abspath if account is allowed to reach
+// it, ie. all nodes up to it must have execute flags set.
+func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 	rn := me.mounts(abspath)
 	nodes, err := rn.Locate(abspath)
 	if err != nil {
@@ -88,7 +98,7 @@ func (me *Syscall) Stat(abspath string) (*nugo.Node, error) {
 	}
 	for _, n := range nodes {
 		if err := me.acc.Permitted(OpExec, n.Seal()); err != nil {
-			return nil, fmt.Errorf("Stat %s uid:%d: %v", abspath, me.acc.uid, err)
+			return nil, fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
 		}
 	}
 	return nodes[len(nodes)-1], nil
