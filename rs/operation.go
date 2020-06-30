@@ -2,16 +2,16 @@ package rs
 
 import "github.com/gregoryv/nugo"
 
-type Operation uint
+type operation uint
 
 const (
-	OpRead Operation = iota
+	OpRead operation = iota
 	OpWrite
 	OpExec
 )
 
 // Modes
-func (me Operation) Modes() (n, u, g, o nugo.NodeMode) {
+func (me operation) Modes() (n, u, g, o nugo.NodeMode) {
 	switch me {
 	case OpRead:
 		return 04000, 00400, 00040, 00004
@@ -23,7 +23,7 @@ func (me Operation) Modes() (n, u, g, o nugo.NodeMode) {
 	panic("bad operation")
 }
 
-func (o Operation) String() string {
+func (o operation) String() string {
 	switch o {
 	case OpRead:
 		return "read"

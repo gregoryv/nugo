@@ -7,17 +7,17 @@ import (
 	"github.com/gregoryv/nugo"
 )
 
-func TestOperation_String(t *testing.T) {
+func Test_operation_String(t *testing.T) {
 	var (
 		assert = asserter.New(t)
 	)
 	assert(OpRead.String() == "read")
 	assert(OpWrite.String() == "write")
 	assert(OpExec.String() == "exec")
-	assert(Operation(10).String() == "")
+	assert(operation(10).String() == "")
 }
 
-func TestOperation_Modes(t *testing.T) {
+func Test_operation_Modes(t *testing.T) {
 	ok := func(n, u, g, o nugo.NodeMode) {
 		t.Helper()
 		assert := asserter.New(t)
@@ -33,12 +33,12 @@ func TestOperation_Modes(t *testing.T) {
 	ok(OpExec.Modes())
 }
 
-func TestOperation_Modes_bad(t *testing.T) {
+func Test_operation_Modes_bad(t *testing.T) {
 	defer func() {
 		e := recover()
 		if e == nil {
 			t.Error("should panic")
 		}
 	}()
-	Operation(10).Modes()
+	operation(10).Modes()
 }
