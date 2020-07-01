@@ -64,7 +64,7 @@ type Executable interface {
 
 // Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error) {
+func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.stat(dir)
 	if err != nil {
@@ -73,9 +73,9 @@ func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*nugo.Node, error)
 	if err := me.acc.permitted(OpWrite, parent.Seal()); err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
-	node := parent.Make(name)
-	node.SetPerm(mode)
-	return node, nil
+	n := parent.Make(name)
+	n.SetPerm(mode)
+	return &ResInfo{node: n}, nil
 }
 
 // Stat returns the node of the abspath if account is allowed to reach
