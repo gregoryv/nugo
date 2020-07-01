@@ -9,15 +9,15 @@ import (
 	"github.com/gregoryv/fox"
 )
 
-func TestNode_Resource(t *testing.T) {
+func TestNode_Source(t *testing.T) {
 	var (
 		n = &Node{}
 	)
-	if n.Resource() != nil {
+	if n.Source() != nil {
 		t.Fail()
 	}
-	n.SetResource(1)
-	if n.Resource() == nil {
+	n.SetSource(1)
+	if n.Source() == nil {
 		t.Fail()
 	}
 }
@@ -54,12 +54,12 @@ func ExampleNode_UnsetMode() {
 	// ---xrwxr-xr-x 0 0 node
 }
 
-func TestNode_SetResource(t *testing.T) {
+func TestNode_SetSource(t *testing.T) {
 	var (
 		n = NewNode("val")
 	)
-	n.SetResource(1)
-	if n.resource.(int) != 1 {
+	n.SetSource(1)
+	if n.src.(int) != 1 {
 		t.Fail()
 	}
 }

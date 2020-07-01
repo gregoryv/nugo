@@ -97,14 +97,14 @@ type Node struct {
 	gid  int
 	mode NodeMode
 
-	resource interface{}
+	src interface{}
 }
 
 // Name returns the base name of a node
 func (my *Node) Name() string { return my.name }
 
-// Resource returns the nodes resource or nil if none is set
-func (my *Node) Resource() interface{} { return my.resource }
+// Source returns the nodes resource or nil if none is set
+func (my *Node) Source() interface{} { return my.src }
 
 // Seal returns the access control seal of this node.
 func (my *Node) Seal() *Seal {
@@ -123,8 +123,8 @@ func (my *Node) SetPerm(perm NodeMode) {
 	my.mode = mode | perm
 }
 
-// SetResource of this node, use nil to clear
-func (my *Node) SetResource(r interface{}) { my.resource = r }
+// SetSource of this node, use nil to clear
+func (my *Node) SetSource(r interface{}) { my.src = r }
 
 // IsDir returns true if ModeDir is set
 func (me *Node) IsDir() bool { return me.mode&ModeDir != 0 }

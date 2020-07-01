@@ -34,6 +34,7 @@ type Account struct {
 	debug fox.Logger
 }
 
+// todo hide as command
 func (me *Account) AddGroup(gid int) {
 	for _, id := range me.groups {
 		if id == gid {
@@ -45,6 +46,7 @@ func (me *Account) AddGroup(gid int) {
 	me.mu.Unlock()
 }
 
+// todo hide as command
 func (me *Account) DelGroup(gid int) {
 	for i, id := range me.groups {
 		if id == gid {
@@ -54,6 +56,11 @@ func (me *Account) DelGroup(gid int) {
 			return
 		}
 	}
+}
+
+// Use returns a Syscall struct for accessing the system.
+func (me *Account) Use(sys *System) *Syscall {
+	return &Syscall{System: sys, acc: me}
 }
 
 func (me *Account) owns(id int) bool { return me.uid == id }

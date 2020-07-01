@@ -15,23 +15,44 @@ type Syscall struct {
 type Src = interface{}
 type Mode = nugo.NodeMode
 
+// Create
+func (me *Syscall) Create(abspath string) (*Resource, error) {
+	n, err := me.install(abspath, nil, 00644)
+	if err != nil {
+		return nil, err
+	}
+	return &Resource{node: n}, nil
+}
+
 // install resource at the absolute path
 func (me *Syscall) Install(abspath string, src Src, mode Mode) (*ResInfo, error) {
+	n, err := me.install(abspath, src, mode)
+	if err != nil {
+		return nil, fmt.Errorf("Install: %w", err)
+	}
+	return &ResInfo{node: n}, nil
+}
+
+func (me *Syscall) install(abspath string, src Src, mode Mode) (*nugo.Node, error) {
+	_, err := me.Stat(abspath)
+	if err == nil {
+		return nil, fmt.Errorf("%s already exists", abspath)
+	}
 	dir, name := path.Split(abspath)
 	parent, err := me.Stat(dir)
 	if err != nil {
 		return nil, err
 	}
 	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
-		return nil, fmt.Errorf("Install: %v", err)
+		return nil, err
 	}
 	n := parent.node.Make(name)
 	n.SetPerm(mode)
 	if src != nil {
-		n.SetResource(src)
+		n.SetSource(src)
 		n.UnsetMode(nugo.ModeDir)
 	}
-	return &ResInfo{node: n}, nil
+	return n, nil
 }
 
 // ExecCmd creates and executes a new command with system defaults.
@@ -46,13 +67,13 @@ func (me *Syscall) Exec(cmd *Cmd) error {
 	if err != nil {
 		return err
 	}
-	switch r := n.Resource().(type) {
+	switch src := n.Source().(type) {
 	case Executable:
 		// If needed setuid can be checked and enforced here
 		cmd.Sys = me
-		return r.Exec(cmd)
+		return src.Exec(cmd)
 	default:
-		return fmt.Errorf("Cannot run %T", r)
+		return fmt.Errorf("Cannot run %T", src)
 	}
 }
 

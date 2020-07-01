@@ -7,10 +7,19 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_Create(t *testing.T) {
+	var (
+		asRoot  = Root.Use(NewSystem())
+		ok, bad = asserter.NewMixed(t)
+	)
+	ok(asRoot.Create("/file"))
+	bad(asRoot.Create("/"))
+}
+
 func TestSyscall_Mkdir(t *testing.T) {
 	var (
-		asRoot      = Syscall{System: NewSystem(), acc: Root}
-		asAnonymous = Syscall{System: NewSystem(), acc: Anonymous}
+		asRoot      = Root.Use(NewSystem())
+		asAnonymous = Anonymous.Use(NewSystem())
 		ok, bad     = asserter.NewMixed(t)
 	)
 	ok(asRoot.Mkdir("/adir", 0))
@@ -24,8 +33,7 @@ func TestSyscall_Mkdir(t *testing.T) {
 
 func TestSyscall_Exec(t *testing.T) {
 	var (
-		sys     = &Syscall{System: NewSystem(), acc: Root}
-		Exec    = sys.Exec
+		Exec    = Root.Use(NewSystem()).Exec
 		ok, bad = asserter.NewErrors(t)
 	)
 	ok(Exec(NewCmd("/bin/mkdir", "/tmp")))
@@ -41,7 +49,7 @@ func TestSyscall_Exec(t *testing.T) {
 }
 
 func ExampleSyscall_Stat() {
-	sys := &Syscall{System: NewSystem(), acc: Anonymous}
+	sys := Anonymous.Use(NewSystem())
 	_, err := sys.Stat("/etc/accounts")
 	fmt.Println(err)
 	// output:
@@ -50,8 +58,7 @@ func ExampleSyscall_Stat() {
 
 func TestSystem_Stat(t *testing.T) {
 	var (
-		sys     = &Syscall{System: NewSystem(), acc: Anonymous}
-		Stat    = sys.Stat
+		Stat    = Anonymous.Use(NewSystem()).Stat
 		ok, bad = asserter.NewMixed(t)
 	)
 	ok(Stat("/"))
@@ -62,8 +69,8 @@ func TestSystem_Stat(t *testing.T) {
 
 func TestSystem_Install(t *testing.T) {
 	var (
-		asAnonymous = &Syscall{System: NewSystem(), acc: Anonymous}
-		asRoot      = &Syscall{System: NewSystem(), acc: Root}
+		asRoot      = Root.Use(NewSystem())
+		asAnonymous = Anonymous.Use(NewSystem())
 		ok, bad     = asserter.NewMixed(t)
 	)
 	ok(asRoot.Install("/bin/x", nil, 0))
