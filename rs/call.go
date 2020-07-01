@@ -12,12 +12,11 @@ type Syscall struct {
 	acc *Account
 }
 
+type Src = interface{}
+type Mode = nugo.NodeMode
+
 // install resource at the absolute path
-func (me *Syscall) Install(
-	abspath string, resource interface{}, mode nugo.NodeMode,
-) (
-	*ResInfo, error,
-) {
+func (me *Syscall) Install(abspath string, src Src, mode Mode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.Stat(dir)
 	if err != nil {
@@ -28,8 +27,8 @@ func (me *Syscall) Install(
 	}
 	n := parent.node.Make(name)
 	n.SetPerm(mode)
-	if resource != nil {
-		n.SetResource(resource)
+	if src != nil {
+		n.SetResource(src)
 		n.UnsetMode(nugo.ModeDir)
 	}
 	return &ResInfo{node: n}, nil
@@ -63,7 +62,7 @@ type Executable interface {
 
 // Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
+func (me *Syscall) Mkdir(abspath string, mode Mode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.stat(dir)
 	if err != nil {
