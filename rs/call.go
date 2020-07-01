@@ -16,24 +16,23 @@ type Syscall struct {
 func (me *Syscall) Install(
 	abspath string, resource interface{}, mode nugo.NodeMode,
 ) (
-	*nugo.Node, error,
+	*ResInfo, error,
 ) {
 	dir, name := path.Split(abspath)
-	parent, err := me.stat(dir)
+	parent, err := me.Stat(dir)
 	if err != nil {
 		return nil, err
 	}
-	if err := me.acc.permitted(OpWrite, parent.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
 		return nil, fmt.Errorf("Install: %v", err)
 	}
-	node := parent.Make(name)
-	node.SetPerm(mode)
-	node.SetResource(resource)
-	node.UnsetMode(nugo.ModeDir)
+	n := parent.node.Make(name)
+	n.SetPerm(mode)
 	if resource != nil {
-
+		n.SetResource(resource)
+		n.UnsetMode(nugo.ModeDir)
 	}
-	return node, nil
+	return &ResInfo{node: n}, nil
 }
 
 // ExecCmd creates and executes a new command with system defaults.
