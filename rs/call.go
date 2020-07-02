@@ -12,9 +12,6 @@ type Syscall struct {
 	acc *Account
 }
 
-type Src = interface{}
-type Mode = nugo.NodeMode
-
 // Create
 func (me *Syscall) Create(abspath string) (*Resource, error) {
 	n, err := me.install(abspath, nil, 00644)
@@ -25,7 +22,8 @@ func (me *Syscall) Create(abspath string) (*Resource, error) {
 }
 
 // install resource at the absolute path
-func (me *Syscall) Install(abspath string, src Src, mode Mode) (*ResInfo, error) {
+func (me *Syscall) Install(abspath string, src interface{}, mode nugo.NodeMode,
+) (*ResInfo, error) {
 	n, err := me.install(abspath, src, mode)
 	if err != nil {
 		return nil, fmt.Errorf("Install: %w", err)
@@ -33,7 +31,8 @@ func (me *Syscall) Install(abspath string, src Src, mode Mode) (*ResInfo, error)
 	return &ResInfo{node: n}, nil
 }
 
-func (me *Syscall) install(abspath string, src Src, mode Mode) (*nugo.Node, error) {
+func (me *Syscall) install(abspath string, src interface{}, mode nugo.NodeMode,
+) (*nugo.Node, error) {
 	_, err := me.Stat(abspath)
 	if err == nil {
 		return nil, fmt.Errorf("%s already exists", abspath)
@@ -83,7 +82,7 @@ type Executable interface {
 
 // Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) Mkdir(abspath string, mode Mode) (*ResInfo, error) {
+func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.stat(dir)
 	if err != nil {
