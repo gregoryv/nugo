@@ -27,9 +27,11 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 		r.buf = bytes.NewBuffer(src)
 	case string:
 		r.buf = bytes.NewBufferString(src)
+	case Executable:
+		r.buf = bytes.NewBufferString(abspath + " is a builtin executable")
 	default:
 		// todo figure out how to read Any source
-		return nil, fmt.Errorf("Open: non readable source")
+		return nil, fmt.Errorf("Open: %s non readable source", abspath)
 	}
 	// Resource must be closed to unlock
 	n.RLock()

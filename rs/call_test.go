@@ -17,6 +17,7 @@ func TestSyscall_Open_Source(t *testing.T) {
 	)
 	ok(asRoot.Open("/string"))
 	ok(asRoot.Open("/byteSlice"))
+	ok(asRoot.Open("/bin/mkdir"))
 	bad(asRoot.Open("/int"))
 }
 
