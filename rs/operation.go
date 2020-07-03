@@ -2,10 +2,10 @@ package rs
 
 import "github.com/gregoryv/nugo"
 
-type operation uint
+type operation uint32
 
 const (
-	OpRead operation = iota
+	OpRead operation = 1 << (32 - 1 - iota)
 	OpWrite
 	OpExec
 )

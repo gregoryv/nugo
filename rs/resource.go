@@ -23,17 +23,24 @@ func (me *ResInfo) IsDir() error {
 	return nil
 }
 
+func newResource(n *nugo.Node, op operation) *Resource {
+	return &Resource{
+		node: n,
+		op:   op,
+	}
+}
+
 // Resource wraps access to the underlying node
 type Resource struct {
-	readOnly bool
-	node     *nugo.Node
-	unlock   func()
-	buf      *bytes.Buffer // used for reading node source
+	node   *nugo.Node
+	op     operation
+	unlock func()
+	buf    *bytes.Buffer // used for reading node source
 }
 
 // SetSource sets the src of the underlying node. Returns error if it's readonly.
 func (me *Resource) SetSource(src interface{}) error {
-	if me.readOnly {
+	if me.op&OpWrite == 0 {
 		return fmt.Errorf("SetSource: %s read only", me.node.Name())
 	}
 	// maybe limit to certain types here
@@ -44,13 +51,7 @@ func (me *Resource) SetSource(src interface{}) error {
 // Read
 func (me *Resource) Read(b []byte) (int, error) {
 	if me.buf == nil {
-		src := me.node.Source()
-		switch src := src.(type) {
-		case []byte:
-			me.buf = bytes.NewBuffer(src)
-		case string:
-			me.buf = bytes.NewBufferString(src)
-		}
+		return 0, fmt.Errorf("Read: unreadable source")
 	}
 	return me.buf.Read(b)
 }

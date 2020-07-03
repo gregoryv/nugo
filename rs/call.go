@@ -1,6 +1,7 @@
 package rs
 
 import (
+	"bytes"
 	"fmt"
 	"path"
 
@@ -12,15 +13,27 @@ type Syscall struct {
 	acc *Account
 }
 
-// Open
+// Open resource for reading
 func (me *Syscall) Open(abspath string) (*Resource, error) {
 	n, err := me.stat(abspath)
 	if err != nil {
 		return nil, fmt.Errorf("Open: %s", err)
 	}
-	n.RLock()
+	r := newResource(n, OpRead)
+	r.unlock = n.RUnlock
+	src := n.Source()
+	switch src := src.(type) {
+	case []byte:
+		r.buf = bytes.NewBuffer(src)
+	case string:
+		r.buf = bytes.NewBufferString(src)
+	default:
+		// todo figure out how to read Any source
+		return nil, fmt.Errorf("Open: non readable source")
+	}
 	// Resource must be closed to unlock
-	return &Resource{node: n, readOnly: true, unlock: n.RUnlock}, nil
+	n.RLock()
+	return r, nil
 }
 
 // Create returns a new resource for writing

@@ -7,14 +7,26 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_Open_Source(t *testing.T) {
+	var (
+		asRoot  = Root.Use(NewSystem())
+		_, _    = asRoot.Install("/string", "a string", 00644)
+		_, _    = asRoot.Install("/byteSlice", []byte("bytes"), 00644)
+		_, _    = asRoot.Install("/int", 1, 00644)
+		ok, bad = asserter.NewMixed(t)
+	)
+	ok(asRoot.Open("/string"))
+	ok(asRoot.Open("/byteSlice"))
+	bad(asRoot.Open("/int"))
+}
+
 func TestSyscall_Open(t *testing.T) {
 	var (
 		sys         = NewSystem()
 		asRoot      = Root.Use(sys)
+		_, _        = asRoot.Install("/existing.dat", "content", 00644)
 		asAnonymous = Anonymous.Use(sys)
 		ok, bad     = asserter.NewMixed(t)
-		res, _      = asRoot.Create("/existing.dat")
-		_           = res.Close()
 	)
 	// owner has read permission on newly created resources
 	ok(asRoot.Open("/existing.dat"))

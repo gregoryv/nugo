@@ -2,7 +2,6 @@ package rs
 
 import (
 	"bytes"
-	"io"
 	"testing"
 
 	"github.com/gregoryv/asserter"
@@ -31,8 +30,8 @@ func TestResInfo_IsDir(t *testing.T) {
 
 func TestResource_SetSource(t *testing.T) {
 	var (
-		rw       = &Resource{node: nugo.NewNode("x")}
-		readOnly = &Resource{readOnly: true, node: nugo.NewNode("x")}
+		rw       = newResource(nugo.NewNode("x"), OpRead|OpWrite)
+		readOnly = newResource(nugo.NewNode("x"), OpRead)
 		ok, bad  = asserter.NewErrors(t)
 	)
 	ok(rw.SetSource(1))
@@ -41,21 +40,12 @@ func TestResource_SetSource(t *testing.T) {
 
 func TestResource_Read(t *testing.T) {
 	var (
-		n      = nugo.NewNode("node")
-		r      = &Resource{readOnly: true, node: n, unlock: func() {}}
-		assert = asserter.New(t)
-		ok, _  = asserter.NewMixed(t)
-		buf    bytes.Buffer
+		ok, bad = asserter.NewMixed(t)
+		b       = make([]byte, 10)
 	)
-	// Read byte slice
-	n.SetSource([]byte("hello"))
-	ok(io.Copy(&buf, r))
-	assert().Equals(buf.String(), "hello")
-	r.Close()
-	// Read string
-	n.SetSource("world")
-	buf.Reset()
-	ok(io.Copy(&buf, r))
-	assert().Equals(buf.String(), "world")
-	r.Close()
+	r := &Resource{buf: bytes.NewBufferString("hello")}
+	ok(r.Read(b))
+	r = &Resource{}
+	bad(r.Read(b))
+
 }
