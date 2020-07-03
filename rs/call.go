@@ -44,8 +44,6 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 	switch src := src.(type) {
 	case []byte:
 		r.buf = bytes.NewBuffer(src)
-	case string:
-		r.buf = bytes.NewBufferString(src)
 	default:
 		// todo figure out how to read Any source
 		return nil, fmt.Errorf("Open: %s(%T) non readable source", abspath, src)
@@ -117,7 +115,7 @@ func (me *Syscall) Load(res interface{}, abspath string) error {
 }
 
 // Install resource at the absolute path
-func (me *Syscall) Install(abspath string, src interface{}, mode nugo.NodeMode,
+func (me *Syscall) Install(abspath string, cmd Executable, mode nugo.NodeMode,
 ) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.Stat(dir)
@@ -129,10 +127,8 @@ func (me *Syscall) Install(abspath string, src interface{}, mode nugo.NodeMode,
 	}
 	n := parent.node.Make(name)
 	n.SetPerm(mode)
-	if src != nil {
-		n.SetSource(src)
-		n.UnsetMode(nugo.ModeDir)
-	}
+	n.SetSource(cmd)
+	n.UnsetMode(nugo.ModeDir)
 	return &ResInfo{node: n}, nil
 }
 

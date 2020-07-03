@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gregoryv/asserter"
-	"github.com/gregoryv/nugo"
 )
 
 func TestResInfo_Name(t *testing.T) {
@@ -26,18 +25,6 @@ func TestResInfo_IsDir(t *testing.T) {
 	)
 	ok(dir.IsDir())
 	bad(file.IsDir())
-}
-
-func TestResource_SetSource(t *testing.T) {
-	var (
-		w        = newResource(nugo.NewNode("x"), OpWrite)
-		readOnly = newResource(nugo.NewNode("x"), OpRead)
-		ok, bad  = asserter.NewErrors(t)
-	)
-	ok(w.SetSource("string"))
-	ok(w.SetSource([]byte("bytes")))
-	bad(w.SetSource(1))
-	bad(readOnly.SetSource("read only"))
 }
 
 func TestResource_Read(t *testing.T) {

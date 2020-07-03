@@ -40,22 +40,6 @@ type Resource struct {
 	buf *bytes.Buffer // used for writing
 }
 
-// SetSource sets the src of the underlying node. Returns error if it's readonly.
-func (me *Resource) SetSource(src interface{}) error {
-	if me.readOnly() {
-		return fmt.Errorf("SetSource: %s read only", me.node.Name())
-	}
-	switch src := src.(type) {
-	case string:
-	case []byte:
-	case Executable:
-	default:
-		return fmt.Errorf("SetSource: %T cannot be used as source", src)
-	}
-	me.node.SetSource(src)
-	return nil
-}
-
 // Read reads from the underlying source. Fails if not readable or
 // resource is in write mode.
 func (me *Resource) Read(b []byte) (int, error) {

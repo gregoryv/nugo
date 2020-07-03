@@ -22,6 +22,8 @@ type Cmd struct {
 	Sys *Syscall
 }
 
+// ----------------------------------------
+
 type mkdirCmd struct{}
 
 func (me *mkdirCmd) Exec(c *Cmd) error {

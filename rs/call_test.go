@@ -64,36 +64,22 @@ func TestSyscall_SaveAs(t *testing.T) {
 	bad(asRoot.SaveAs("/", thing))
 }
 
-func TestSyscall_Open_Source(t *testing.T) {
-	var (
-		asRoot  = Root.Use(NewSystem())
-		_, _    = asRoot.Install("/string", "a string", 00644)
-		_, _    = asRoot.Install("/byteSlice", []byte("bytes"), 00644)
-		_, _    = asRoot.Install("/int", 1, 00644)
-		ok, bad = asserter.NewMixed(t)
-	)
-	ok(asRoot.Open("/string"))
-	ok(asRoot.Open("/byteSlice"))
-	bad(asRoot.Open("/bin/mkdir"))
-	bad(asRoot.Open("/int"))
-}
-
 func TestSyscall_Open(t *testing.T) {
 	var (
 		sys         = NewSystem()
 		asRoot      = Root.Use(sys)
-		_, _        = asRoot.Install("/existing.dat", "content", 00644)
 		asAnonymous = Anonymous.Use(sys)
+		_           = asRoot.Save("/tmp/alien.gob", &Alien{Name: "x"})
 		ok, bad     = asserter.NewMixed(t)
 	)
 	// owner has read permission on newly created resources
-	ok(asRoot.Open("/existing.dat"))
+	ok(asRoot.Open("/tmp/alien.gob"))
 	// missing resource
 	bad(asRoot.Open("/nosuch"))
 	// inadequate permission
-	bad(asAnonymous.Open("/existing.dat"))
+	bad(asAnonymous.Open("/tmp/alien.gob"))
 	// write to read only
-	res, _ := asRoot.Open("/existing.dat")
+	res, _ := asRoot.Open("/tmp/alien.gob")
 	bad(res.Write([]byte("")))
 }
 
