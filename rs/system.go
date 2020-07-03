@@ -24,12 +24,16 @@ func NewSystem() *System {
 	syscall.Install("/bin/mkdir", &mkdirCmd{}, 00755)
 
 	// Order is important until mkdir supports -p flag
-	dirs := []string{
-		"/etc",
-		"/etc/accounts",
+	dirs := []struct {
+		abspath string
+		mode    string
+	}{
+		{"/etc", "00755"},
+		{"/etc/accounts", "00755"},
+		{"/tmp", "07777"},
 	}
-	for _, dir := range dirs {
-		syscall.Exec(NewCmd("/bin/mkdir", "-m", "00755", dir))
+	for _, d := range dirs {
+		syscall.Exec(NewCmd("/bin/mkdir", "-m", d.mode, d.abspath))
 	}
 	return sys
 }

@@ -12,4 +12,5 @@ func ExampleNewSystem() {
 	// ----rwxr-xr-x 1 1 /bin/mkdir
 	// d---rwxr-xr-x 1 1 /etc
 	// d---rwxr-xr-x 1 1 /etc/accounts
+	// drwxrwxrwxrwx 1 1 /tmp
 }
