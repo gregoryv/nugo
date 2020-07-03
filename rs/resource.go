@@ -56,10 +56,21 @@ func (me *Resource) SetSource(src interface{}) error {
 
 // Read
 func (me *Resource) Read(b []byte) (int, error) {
+	if me.op&OpRead == 0 {
+		return 0, fmt.Errorf("Read: %s not readable", me.node.Name())
+	}
 	if me.buf == nil {
 		return 0, fmt.Errorf("Read: unreadable source")
 	}
 	return me.buf.Read(b)
+}
+
+// Write
+func (me *Resource) Write(p []byte) (int, error) {
+	if me.op&OpWrite == 0 {
+		return 0, fmt.Errorf("Write: %s not writable", me.node.Name())
+	}
+	return me.buf.Write(p)
 }
 
 // Close

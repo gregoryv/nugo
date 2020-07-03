@@ -7,6 +7,17 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_SaveAs(t *testing.T) {
+	var (
+		asRoot  = Root.Use(NewSystem())
+		thing   = struct{ Name string }{"thing"}
+		ok, bad = asserter.NewErrors(t)
+	)
+	ok(asRoot.SaveAs("/thing.gob", &thing))
+	bad(asRoot.SaveAs("/thing.gob", &thing))
+	bad(asRoot.SaveAs("/", thing))
+}
+
 func TestSyscall_Open_Source(t *testing.T) {
 	var (
 		asRoot  = Root.Use(NewSystem())
@@ -35,6 +46,9 @@ func TestSyscall_Open(t *testing.T) {
 	bad(asRoot.Open("/nosuch"))
 	// inadequate permission
 	bad(asAnonymous.Open("/existing.dat"))
+	// write to read only
+	res, _ := asRoot.Open("/existing.dat")
+	bad(res.Write([]byte("")))
 }
 
 func TestSyscall_Create(t *testing.T) {
@@ -42,7 +56,10 @@ func TestSyscall_Create(t *testing.T) {
 		asRoot  = Root.Use(NewSystem())
 		ok, bad = asserter.NewMixed(t)
 	)
-	ok(asRoot.Create("/file"))
+	res, err := asRoot.Create("/file")
+	ok(res, err)
+	// read a write only
+	bad(res.Read([]byte{}))
 	bad(asRoot.Create("/"))
 }
 

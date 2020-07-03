@@ -2,6 +2,7 @@ package rs
 
 import (
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"path"
 
@@ -38,6 +39,23 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 	return r, nil
 }
 
+// SaveAs save src to the given abspath. Fails if abspath already exists.
+func (me *Syscall) SaveAs(abspath string, src interface{}) error {
+	w, err := me.Create(abspath)
+	if err != nil {
+		return wrap("Save", err)
+	}
+	defer w.Close()
+	return wrap("Save", gob.NewEncoder(w).Encode(src))
+}
+
+func wrap(prefix string, err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("%s: %w", prefix, err)
+}
+
 // Create returns a new resource for writing
 func (me *Syscall) Create(abspath string) (*Resource, error) {
 	n, err := me.install(abspath, nil, 00644)
@@ -45,7 +63,10 @@ func (me *Syscall) Create(abspath string) (*Resource, error) {
 		return nil, err
 	}
 	n.Lock()
-	return &Resource{node: n, unlock: n.Unlock}, nil
+	r := newResource(n, OpWrite)
+	r.buf = &bytes.Buffer{}
+	r.unlock = n.Unlock
+	return r, nil
 }
 
 // install resource at the absolute path
