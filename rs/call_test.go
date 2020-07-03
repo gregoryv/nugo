@@ -22,6 +22,7 @@ func TestSyscall_Load(t *testing.T) {
 	bad(asRoot.Load(&got, "/nosuch"))
 	ok(asRoot.Load(&got, "/thing.gob"))
 	assert(got.Name == "Mr green").Errorf("%v", got)
+	bad(asRoot.Load(&got, "/bin/mkdir"))
 }
 
 func TestSyscall_Save(t *testing.T) {
@@ -58,7 +59,7 @@ func TestSyscall_Open_Source(t *testing.T) {
 	)
 	ok(asRoot.Open("/string"))
 	ok(asRoot.Open("/byteSlice"))
-	ok(asRoot.Open("/bin/mkdir"))
+	bad(asRoot.Open("/bin/mkdir"))
 	bad(asRoot.Open("/int"))
 }
 

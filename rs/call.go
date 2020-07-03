@@ -14,7 +14,8 @@ type Syscall struct {
 	acc *Account
 }
 
-// Open resource for reading
+// Open resource for reading. Underlying source must be string or []byte.
+// If resource is open for writing this call blocks.
 func (me *Syscall) Open(abspath string) (*Resource, error) {
 	n, err := me.stat(abspath)
 	if err != nil {
@@ -28,8 +29,6 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 		r.buf = bytes.NewBuffer(src)
 	case string:
 		r.buf = bytes.NewBufferString(src)
-	case Executable:
-		r.buf = bytes.NewBufferString(abspath + " is a builtin executable")
 	default:
 		// todo figure out how to read Any source
 		return nil, fmt.Errorf("Open: %s(%T) non readable source", abspath, src)
@@ -40,7 +39,7 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 }
 
 // Create returns a new resource for writing. Fails if existing
-// resource is directory.
+// resource is directory. Caller must close resource.
 func (me *Syscall) Create(abspath string) (*Resource, error) {
 	rif, _ := me.Stat(abspath)
 	if rif != nil && rif.IsDir() == nil {
