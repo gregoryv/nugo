@@ -7,6 +7,22 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_Open(t *testing.T) {
+	var (
+		sys         = NewSystem()
+		asRoot      = Root.Use(sys)
+		asAnonymous = Anonymous.Use(sys)
+		ok, bad     = asserter.NewMixed(t)
+		_, _        = asRoot.Create("/existing.dat")
+	)
+	// owner has read permission on newly created resources
+	ok(asRoot.Open("/existing.dat"))
+	// missing resource
+	bad(asRoot.Open("/nosuch"))
+	// inadequate permission
+	bad(asAnonymous.Open("/existing.dat"))
+}
+
 func TestSyscall_Create(t *testing.T) {
 	var (
 		asRoot  = Root.Use(NewSystem())
@@ -23,11 +39,9 @@ func TestSyscall_Mkdir(t *testing.T) {
 		ok, bad     = asserter.NewMixed(t)
 	)
 	ok(asRoot.Mkdir("/adir", 0))
-
 	// parent directory missing
 	bad(asRoot.Mkdir("/nosuch/whatever", 0))
-
-	// permission inadequate
+	// inadequate permission
 	bad(asAnonymous.Mkdir("/whatever", 0))
 }
 
@@ -37,13 +51,10 @@ func TestSyscall_Exec(t *testing.T) {
 		ok, bad = asserter.NewErrors(t)
 	)
 	ok(Exec(NewCmd("/bin/mkdir", "/tmp")))
-
 	// Node not found
 	bad(Exec(NewCmd("/bin/nosuch/mkdir", "/tmp")))
-
 	// Resource not type Executable
 	bad(Exec(NewCmd("/bin")))
-
 	// Bad flag
 	bad(Exec(NewCmd("/bin/mkdir", "-nosuch")))
 }

@@ -12,7 +12,16 @@ type Syscall struct {
 	acc *Account
 }
 
-// Create
+// Open
+func (me *Syscall) Open(abspath string) (*Resource, error) {
+	n, err := me.stat(abspath)
+	if err != nil {
+		return nil, fmt.Errorf("Open: %s", err)
+	}
+	return &Resource{node: n}, nil
+}
+
+// Create returns a new resource for writing
 func (me *Syscall) Create(abspath string) (*Resource, error) {
 	n, err := me.install(abspath, nil, 00644)
 	if err != nil {
