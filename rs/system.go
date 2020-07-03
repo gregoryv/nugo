@@ -1,5 +1,11 @@
 /*
 Package rs provides a resource system which enforces unix style access control.
+
+Resources are stored as nugo.Nodes and can either have a []byte slice
+as source or implement the Executable interface. Using the Save and
+Load syscalls, structs are gob encoded and decoded to an access
+controlled resource.
+
 */
 package rs
 
@@ -20,8 +26,8 @@ func NewSystem() *System {
 	sys := &System{
 		rn: rn,
 	}
-	syscall := &Syscall{System: sys, acc: Root}
-	syscall.Install("/bin/mkdir", &mkdirCmd{}, 00755)
+	asRoot := Root.Use(sys)
+	asRoot.Install("/bin/mkdir", &mkdirCmd{}, 00755)
 
 	// Order is important until mkdir supports -p flag
 	dirs := []struct {
@@ -33,7 +39,7 @@ func NewSystem() *System {
 		{"/tmp", "07777"},
 	}
 	for _, d := range dirs {
-		syscall.Exec(NewCmd("/bin/mkdir", "-m", d.mode, d.abspath))
+		asRoot.Exec(NewCmd("/bin/mkdir", "-m", d.mode, d.abspath))
 	}
 	return sys
 }

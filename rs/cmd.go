@@ -13,9 +13,7 @@ func NewCmd(abspath string, args ...string) *Cmd {
 }
 
 type Cmd struct {
-	// todo maybe add a syscall wrapper so commands cannot switch
-	// accounts
-	Abspath string
+	Abspath string // of the command
 	Args    []string
 
 	// Access to system with a specific account

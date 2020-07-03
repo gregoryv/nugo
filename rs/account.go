@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gregoryv/fox"
 	"github.com/gregoryv/nugo"
 )
 
@@ -30,8 +29,6 @@ type Account struct {
 
 	mu     sync.Mutex
 	groups []int
-
-	debug fox.Logger
 }
 
 // todo hide as command
