@@ -7,10 +7,25 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+// test struct
+type Alien struct {
+	Name string
+}
+
+func TestSyscall_RemoveAll(t *testing.T) {
+	var (
+		sys         = NewSystem()
+		asRoot      = Root.Use(sys)
+		asAnonymous = Anonymous.Use(sys)
+		_           = asRoot.SaveAs("/tmp/alien", &Alien{Name: "RemoveAll"})
+		ok, bad     = asserter.NewErrors(t)
+	)
+	bad(asRoot.RemoveAll("/tmp/nosuch"))
+	ok(asRoot.RemoveAll("/tmp/alien"))
+	bad(asAnonymous.RemoveAll("/etc/accounts"))
+}
+
 func TestSyscall_Load(t *testing.T) {
-	type Alien struct {
-		Name string
-	}
 	var (
 		asRoot  = Root.Use(NewSystem())
 		thing   = Alien{Name: "Mr green"}

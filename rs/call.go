@@ -14,6 +14,23 @@ type Syscall struct {
 	acc *Account
 }
 
+// RemoveAll
+func (me *Syscall) RemoveAll(abspath string) error {
+	rn := me.mounts(abspath)
+	nodes, err := rn.Locate(abspath)
+	if err != nil {
+		return wrap("RemoveAll", err)
+	}
+	for _, n := range nodes {
+		if err := me.acc.permitted(OpExec, n.Seal()); err != nil {
+			return fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
+		}
+	}
+	last := len(nodes) - 1
+	nodes[last-1].DelChild(nodes[last].Name())
+	return nil
+}
+
 // Open resource for reading. Underlying source must be string or []byte.
 // If resource is open for writing this call blocks.
 func (me *Syscall) Open(abspath string) (*Resource, error) {
