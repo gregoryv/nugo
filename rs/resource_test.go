@@ -34,8 +34,10 @@ func TestResource_SetSource(t *testing.T) {
 		readOnly = newResource(nugo.NewNode("x"), OpRead)
 		ok, bad  = asserter.NewErrors(t)
 	)
-	ok(rw.SetSource(1))
-	bad(readOnly.SetSource(2))
+	ok(rw.SetSource("string"))
+	ok(rw.SetSource([]byte("bytes")))
+	bad(rw.SetSource(1))
+	bad(readOnly.SetSource("read only"))
 }
 
 func TestResource_Read(t *testing.T) {
@@ -47,5 +49,4 @@ func TestResource_Read(t *testing.T) {
 	ok(r.Read(b))
 	r = &Resource{}
 	bad(r.Read(b))
-
 }

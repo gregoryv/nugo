@@ -43,7 +43,13 @@ func (me *Resource) SetSource(src interface{}) error {
 	if me.op&OpWrite == 0 {
 		return fmt.Errorf("SetSource: %s read only", me.node.Name())
 	}
-	// maybe limit to certain types here
+	switch src := src.(type) {
+	case string:
+	case []byte:
+	case Executable:
+	default:
+		return fmt.Errorf("SetSource: %T cannot be used as source", src)
+	}
 	me.node.SetSource(src)
 	return nil
 }
