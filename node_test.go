@@ -79,6 +79,7 @@ func TestRootNode_Locate(t *testing.T) {
 	bin := rn.Make("bin")
 	rn.Make("etc")
 	bin.Make("mkdir")
+	_, bad := asserter.NewMixed(t)
 
 	b, err := rn.Locate("/bin/mkdir")
 	if err != nil {
@@ -89,6 +90,8 @@ func TestRootNode_Locate(t *testing.T) {
 		rn.Walk(NodeLogger(t))
 		t.Fail()
 	}
+	// locate missing directory
+	bad(rn.Locate("/bin/nosuch"))
 }
 
 func ExampleRootNode_Locate() {
