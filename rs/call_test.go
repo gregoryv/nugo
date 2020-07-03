@@ -7,6 +7,23 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_Load(t *testing.T) {
+	type Alien struct {
+		Name string
+	}
+	var (
+		asRoot  = Root.Use(NewSystem())
+		thing   = Alien{Name: "Mr green"}
+		got     Alien
+		ok, bad = asserter.NewErrors(t)
+		assert  = asserter.New(t)
+	)
+	ok(asRoot.Save("/thing.gob", &thing))
+	bad(asRoot.Load(&got, "/nosuch"))
+	ok(asRoot.Load(&got, "/thing.gob"))
+	assert(got.Name == "Mr green").Errorf("%v", got)
+}
+
 func TestSyscall_Save(t *testing.T) {
 	var (
 		asRoot  = Root.Use(NewSystem())

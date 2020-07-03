@@ -30,13 +30,13 @@ func TestResInfo_IsDir(t *testing.T) {
 
 func TestResource_SetSource(t *testing.T) {
 	var (
-		rw       = newResource(nugo.NewNode("x"), OpRead|OpWrite)
+		w        = newResource(nugo.NewNode("x"), OpWrite)
 		readOnly = newResource(nugo.NewNode("x"), OpRead)
 		ok, bad  = asserter.NewErrors(t)
 	)
-	ok(rw.SetSource("string"))
-	ok(rw.SetSource([]byte("bytes")))
-	bad(rw.SetSource(1))
+	ok(w.SetSource("string"))
+	ok(w.SetSource([]byte("bytes")))
+	bad(w.SetSource(1))
 	bad(readOnly.SetSource("read only"))
 }
 

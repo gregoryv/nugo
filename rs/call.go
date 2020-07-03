@@ -32,7 +32,7 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 		r.buf = bytes.NewBufferString(abspath + " is a builtin executable")
 	default:
 		// todo figure out how to read Any source
-		return nil, fmt.Errorf("Open: %s non readable source", abspath)
+		return nil, fmt.Errorf("Open: %s(%T) non readable source", abspath, src)
 	}
 	// Resource must be closed to unlock
 	n.RLock()
@@ -87,7 +87,17 @@ func (me *Syscall) Save(abspath string, src interface{}) error {
 	if err != nil {
 		return wrap("Save", err)
 	}
+	defer w.Close()
 	return wrap("Save", gob.NewEncoder(w).Encode(src))
+}
+
+// Load
+func (me *Syscall) Load(res interface{}, abspath string) error {
+	r, err := me.Open(abspath)
+	if err != nil {
+		return fmt.Errorf("Load: %w", err)
+	}
+	return wrap("Load", gob.NewDecoder(r).Decode(res))
 }
 
 // Install resource at the absolute path

@@ -3,6 +3,7 @@ package rs
 import (
 	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/gregoryv/nugo"
 )
@@ -35,12 +36,13 @@ type Resource struct {
 	node   *nugo.Node
 	op     operation
 	unlock func()
-	buf    *bytes.Buffer // used for reading node source
+	io.Reader
+	buf *bytes.Buffer // used for writing
 }
 
 // SetSource sets the src of the underlying node. Returns error if it's readonly.
 func (me *Resource) SetSource(src interface{}) error {
-	if me.op&OpWrite == 0 {
+	if me.readOnly() {
 		return fmt.Errorf("SetSource: %s read only", me.node.Name())
 	}
 	switch src := src.(type) {
@@ -54,10 +56,11 @@ func (me *Resource) SetSource(src interface{}) error {
 	return nil
 }
 
-// Read
+// Read reads from the underlying source. Fails if not readable or
+// resource is in write mode.
 func (me *Resource) Read(b []byte) (int, error) {
-	if me.op&OpRead == 0 {
-		return 0, fmt.Errorf("Read: %s not readable", me.node.Name())
+	if me.writeOnly() {
+		return 0, fmt.Errorf("Read: %s write only", me.node.Name())
 	}
 	if me.buf == nil {
 		return 0, fmt.Errorf("Read: unreadable source")
@@ -65,17 +68,25 @@ func (me *Resource) Read(b []byte) (int, error) {
 	return me.buf.Read(b)
 }
 
-// Write
+// Write writes to the resource. Is not flushed until closed.
 func (me *Resource) Write(p []byte) (int, error) {
-	if me.op&OpWrite == 0 {
-		return 0, fmt.Errorf("Write: %s not writable", me.node.Name())
+	if me.readOnly() {
+		return 0, fmt.Errorf("Write: %s read only", me.node.Name())
 	}
 	return me.buf.Write(p)
 }
 
-// Close
+// Close closes the resource. If resource is in write mode the written
+// buffer is flushed.
 func (me *Resource) Close() error {
+	if me.writeOnly() {
+		me.node.SetSource(me.buf.Bytes())
+	}
 	me.buf = nil
 	me.unlock()
 	return nil
 }
+
+// read + write should not be possible
+func (me *Resource) readOnly() bool  { return me.op&OpRead != 0 }
+func (me *Resource) writeOnly() bool { return me.op&OpWrite != 0 }
