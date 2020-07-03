@@ -42,7 +42,7 @@ func TestResource_SetSource(t *testing.T) {
 func TestResource_Read(t *testing.T) {
 	var (
 		n      = nugo.NewNode("node")
-		r      = &Resource{readOnly: true, node: n}
+		r      = &Resource{readOnly: true, node: n, unlock: func() {}}
 		assert = asserter.New(t)
 		ok, _  = asserter.NewMixed(t)
 		buf    bytes.Buffer

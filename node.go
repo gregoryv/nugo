@@ -97,6 +97,7 @@ type Node struct {
 	gid  int
 	mode NodeMode
 
+	sync.RWMutex
 	src interface{}
 }
 

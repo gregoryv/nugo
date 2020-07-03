@@ -18,7 +18,9 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Open: %s", err)
 	}
-	return &Resource{node: n}, nil
+	n.RLock()
+	// Resource must be closed to unlock
+	return &Resource{node: n, readOnly: true, unlock: n.RUnlock}, nil
 }
 
 // Create returns a new resource for writing
@@ -27,7 +29,8 @@ func (me *Syscall) Create(abspath string) (*Resource, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Resource{node: n}, nil
+	n.Lock()
+	return &Resource{node: n, unlock: n.Unlock}, nil
 }
 
 // install resource at the absolute path

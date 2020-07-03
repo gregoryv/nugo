@@ -17,7 +17,9 @@ func NewSystem() *System {
 	rn.SetSeal(1, 1, 01755)
 	rn.Make("bin")
 
-	sys := &System{rn: rn}
+	sys := &System{
+		rn: rn,
+	}
 	syscall := &Syscall{System: sys, acc: Root}
 	syscall.Install("/bin/mkdir", &mkdirCmd{}, 00755)
 

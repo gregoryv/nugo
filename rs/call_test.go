@@ -13,7 +13,8 @@ func TestSyscall_Open(t *testing.T) {
 		asRoot      = Root.Use(sys)
 		asAnonymous = Anonymous.Use(sys)
 		ok, bad     = asserter.NewMixed(t)
-		_, _        = asRoot.Create("/existing.dat")
+		res, _      = asRoot.Create("/existing.dat")
+		_           = res.Close()
 	)
 	// owner has read permission on newly created resources
 	ok(asRoot.Open("/existing.dat"))
