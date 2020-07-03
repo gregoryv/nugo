@@ -39,29 +39,24 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 	return r, nil
 }
 
-// SaveAs save src to the given abspath. Fails if abspath already exists.
-func (me *Syscall) SaveAs(abspath string, src interface{}) error {
-	w, err := me.Create(abspath)
-	if err != nil {
-		return wrap("Save", err)
-	}
-	defer w.Close()
-	return wrap("Save", gob.NewEncoder(w).Encode(src))
-}
-
-func wrap(prefix string, err error) error {
-	if err == nil {
-		return nil
-	}
-	return fmt.Errorf("%s: %w", prefix, err)
-}
-
-// Create returns a new resource for writing
+// Create returns a new resource for writing. Fails if existing
+// resource is directory.
 func (me *Syscall) Create(abspath string) (*Resource, error) {
-	n, err := me.install(abspath, nil, 00644)
-	if err != nil {
-		return nil, err
+	rif, _ := me.Stat(abspath)
+	if rif != nil && rif.IsDir() == nil {
+		return nil, fmt.Errorf("Create: %s is a directory", abspath)
 	}
+	dir, name := path.Split(abspath)
+	parent, err := me.Stat(dir)
+	if err != nil {
+		return nil, wrap("Create", err)
+	}
+	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
+		return nil, wrap("Create", err)
+	}
+	n := parent.node.Make(name)
+	n.SetPerm(00644)
+	n.UnsetMode(nugo.ModeDir)
 	n.Lock()
 	r := newResource(n, OpWrite)
 	r.buf = &bytes.Buffer{}
@@ -69,29 +64,42 @@ func (me *Syscall) Create(abspath string) (*Resource, error) {
 	return r, nil
 }
 
-// install resource at the absolute path
-func (me *Syscall) Install(abspath string, src interface{}, mode nugo.NodeMode,
-) (*ResInfo, error) {
-	n, err := me.install(abspath, src, mode)
-	if err != nil {
-		return nil, fmt.Errorf("Install: %w", err)
+// SaveAs save src to the given abspath. Fails if abspath already exists.
+func (me *Syscall) SaveAs(abspath string, src interface{}) error {
+	if _, err := me.Stat(abspath); err == nil {
+		return fmt.Errorf("SaveAs: %s exists", abspath)
 	}
-	return &ResInfo{node: n}, nil
+	w, err := me.Create(abspath)
+	if err != nil {
+		return wrap("SaveAs", err)
+	}
+	defer w.Close()
+	return wrap("SaveAs", gob.NewEncoder(w).Encode(src))
 }
 
-func (me *Syscall) install(abspath string, src interface{}, mode nugo.NodeMode,
-) (*nugo.Node, error) {
-	_, err := me.Stat(abspath)
-	if err == nil {
-		return nil, fmt.Errorf("%s already exists", abspath)
+// Save save src to the given abspath. Overwrites existing resource.
+func (me *Syscall) Save(abspath string, src interface{}) error {
+	rif, _ := me.Stat(abspath)
+	if rif != nil && rif.IsDir() == nil {
+		return fmt.Errorf("Save: %s is directory", abspath)
 	}
+	w, err := me.Create(abspath)
+	if err != nil {
+		return wrap("Save", err)
+	}
+	return wrap("Save", gob.NewEncoder(w).Encode(src))
+}
+
+// Install resource at the absolute path
+func (me *Syscall) Install(abspath string, src interface{}, mode nugo.NodeMode,
+) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.Stat(dir)
 	if err != nil {
-		return nil, err
+		return nil, wrap("Install", err)
 	}
 	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
-		return nil, err
+		return nil, wrap("Install", err)
 	}
 	n := parent.node.Make(name)
 	n.SetPerm(mode)
@@ -99,7 +107,7 @@ func (me *Syscall) install(abspath string, src interface{}, mode nugo.NodeMode,
 		n.SetSource(src)
 		n.UnsetMode(nugo.ModeDir)
 	}
-	return n, nil
+	return &ResInfo{node: n}, nil
 }
 
 // ExecCmd creates and executes a new command with system defaults.
@@ -168,4 +176,11 @@ func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 		}
 	}
 	return nodes[len(nodes)-1], nil
+}
+
+func wrap(prefix string, err error) error {
+	if err != nil {
+		return fmt.Errorf("%s: %w", prefix, err)
+	}
+	return nil
 }

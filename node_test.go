@@ -11,15 +11,10 @@ import (
 
 func TestNode_Source(t *testing.T) {
 	var (
-		n = &Node{}
+		n      = &Node{src: 1}
+		assert = asserter.New(t)
 	)
-	if n.Source() != nil {
-		t.Fail()
-	}
-	n.SetSource(1)
-	if n.Source() == nil {
-		t.Fail()
-	}
+	assert(n.Source() != nil).Error("nil Source")
 }
 
 func TestNode_IsDir(t *testing.T) {
@@ -34,11 +29,11 @@ func TestNode_IsDir(t *testing.T) {
 
 func TestRootNode_Child(t *testing.T) {
 	var (
-		rn = NewRootNode("/", ModeDir)
+		rn     = NewRootNode("/", ModeDir)
+		n      = rn.Child()
+		assert = asserter.New(t)
 	)
-	if n := rn.Child(); n != nil {
-		t.Fail()
-	}
+	assert(n == nil).Error("expect no child")
 }
 
 func ExampleNode_UnsetMode() {
