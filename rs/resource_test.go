@@ -1,6 +1,8 @@
 package rs
 
 import (
+	"bytes"
+	"io"
 	"testing"
 
 	"github.com/gregoryv/asserter"
@@ -35,4 +37,25 @@ func TestResource_SetSource(t *testing.T) {
 	)
 	ok(rw.SetSource(1))
 	bad(readOnly.SetSource(2))
+}
+
+func TestResource_Read(t *testing.T) {
+	var (
+		n      = nugo.NewNode("node")
+		r      = &Resource{readOnly: true, node: n}
+		assert = asserter.New(t)
+		ok, _  = asserter.NewMixed(t)
+		buf    bytes.Buffer
+	)
+	// Read byte slice
+	n.SetSource([]byte("hello"))
+	ok(io.Copy(&buf, r))
+	assert().Equals(buf.String(), "hello")
+	r.Close()
+	// Read string
+	n.SetSource("world")
+	buf.Reset()
+	ok(io.Copy(&buf, r))
+	assert().Equals(buf.String(), "world")
+	r.Close()
 }

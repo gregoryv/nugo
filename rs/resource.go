@@ -1,6 +1,7 @@
 package rs
 
 import (
+	"bytes"
 	"fmt"
 	"sync"
 
@@ -28,6 +29,8 @@ type Resource struct {
 	readOnly bool
 	mu       sync.Mutex
 	node     *nugo.Node
+
+	buf *bytes.Buffer // used for reading node source
 }
 
 // SetSource sets the src of the underlying node. Returns error if it's readonly.
@@ -40,5 +43,25 @@ func (me *Resource) SetSource(src interface{}) error {
 	me.mu.Lock()
 	me.node.SetSource(src)
 	me.mu.Unlock()
+	return nil
+}
+
+// Read
+func (me *Resource) Read(b []byte) (int, error) {
+	if me.buf == nil {
+		src := me.node.Source()
+		switch src := src.(type) {
+		case []byte:
+			me.buf = bytes.NewBuffer(src)
+		case string:
+			me.buf = bytes.NewBufferString(src)
+		}
+	}
+	return me.buf.Read(b)
+}
+
+// Close
+func (me *Resource) Close() error {
+	me.buf = nil
 	return nil
 }
