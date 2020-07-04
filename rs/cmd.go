@@ -2,7 +2,9 @@ package rs
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/gregoryv/nugo"
 )
@@ -18,6 +20,11 @@ type Cmd struct {
 
 	// Access to system with a specific account
 	Sys *Syscall
+}
+
+// String
+func (me *Cmd) String() string {
+	return fmt.Sprintf("%s %s", me.Abspath, strings.Join(me.Args, " "))
 }
 
 // ----------------------------------------

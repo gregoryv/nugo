@@ -9,7 +9,9 @@ import (
 
 func TestResInfo_Name(t *testing.T) {
 	var (
-		rif, _ = NewSystem().Use(Root).Stat("/")
+		sys    = NewSystem()
+		asRoot = Root.Use(sys)
+		rif, _ = asRoot.Stat("/")
 	)
 	if rif.Name() != "/" {
 		t.Error("name failed")
@@ -18,7 +20,8 @@ func TestResInfo_Name(t *testing.T) {
 
 func TestResInfo_IsDir(t *testing.T) {
 	var (
-		asRoot  = NewSystem().Use(Root)
+		sys     = NewSystem()
+		asRoot  = Root.Use(sys)
 		dir, _  = asRoot.Stat("/")
 		file, _ = asRoot.Stat("/bin/mkdir")
 		ok, bad = asserter.NewErrors(t)

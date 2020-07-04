@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/gregoryv/fox"
 	"github.com/gregoryv/nugo"
 )
 
 type Syscall struct {
-	*System // probably should hide this
+	*System
 	acc     *Account
+	auditer fox.Logger // used to audit who executes what
 }
 
 // RemoveAll
@@ -138,7 +140,8 @@ func (me *Syscall) ExecCmd(abspath string, args ...string) error {
 }
 
 // Exec executes the given command. Fails if e.g. resource is not
-// Executable.
+// Executable. All exec calls are audited if system has an auditer
+// configured.
 func (me *Syscall) Exec(cmd *Cmd) error {
 	n, err := me.stat(cmd.Abspath)
 	if err != nil {
@@ -148,7 +151,17 @@ func (me *Syscall) Exec(cmd *Cmd) error {
 	case Executable:
 		// If needed setuid can be checked and enforced here
 		cmd.Sys = me
-		return src.Exec(cmd)
+		err = src.Exec(cmd)
+		if me.auditer != nil {
+			msg := fmt.Sprintf("%v %s", me.acc.uid, cmd.String())
+			if err != nil {
+				// don't audit the actual error message, leave that to
+				// other form of logging
+				msg = fmt.Sprintf("%s ERR", msg)
+			}
+			me.auditer.Log(msg)
+		}
+		return err
 	default:
 		return fmt.Errorf("Cannot run %T", src)
 	}

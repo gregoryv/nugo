@@ -60,7 +60,11 @@ func (me *Account) DelGroup(gid int) {
 
 // Use returns a Syscall struct for accessing the system.
 func (me *Account) Use(sys *System) *Syscall {
-	return &Syscall{System: sys, acc: me}
+	return &Syscall{
+		System:  sys,
+		acc:     me,
+		auditer: sys.auditer,
+	}
 }
 
 func (me *Account) owns(id int) bool { return me.uid == id }

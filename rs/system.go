@@ -17,6 +17,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/gregoryv/fox"
 	"github.com/gregoryv/nugo"
 )
 
@@ -44,7 +45,14 @@ func installSys(sys *System) {
 }
 
 type System struct {
-	mounts map[string]*nugo.RootNode
+	mounts  map[string]*nugo.RootNode
+	auditer fox.Logger // Used audit Syscall.Exec calls
+}
+
+// SetAuditer sets the auditer for Syscall.Exec calls
+func (me *System) SetAuditer(auditer fox.Logger) *System {
+	me.auditer = auditer
+	return me
 }
 
 func (me *System) mount(rn *nugo.RootNode) error {
@@ -68,11 +76,6 @@ func (me *System) rootNode(abspath string) *nugo.RootNode {
 		}
 	}
 	return rn
-}
-
-// Use returns a syscall for the given account
-func (me *System) Use(acc *Account) *Syscall {
-	return &Syscall{System: me, acc: acc}
 }
 
 // dumprs writes the entire graph

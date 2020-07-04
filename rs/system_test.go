@@ -1,13 +1,35 @@
 package rs
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/gregoryv/asserter"
+	"github.com/gregoryv/fox"
 	"github.com/gregoryv/nugo"
 )
+
+func TestSystem_SetAuditer(t *testing.T) {
+	var (
+		buf     bytes.Buffer
+		sys     = NewSystem().SetAuditer(fox.NewSyncLog(&buf))
+		asRoot  = Root.Use(sys) // use after the auditer is set
+		asJohn  = NewAccount("john", 2).Use(sys)
+		ok, bad = asserter.NewErrors(t)
+	)
+	bad(asJohn.ExecCmd("/bin/mkdir", "/etc/s"))
+	ok(asJohn.ExecCmd("/bin/mkdir", "/tmp/s"))
+	ok(asRoot.ExecCmd("/bin/mkdir", "/etc/x"))
+	if buf.String() == "" {
+		t.Error("expected audit")
+	}
+	if !strings.Contains(buf.String(), "ERR") {
+		t.Error(buf.String())
+	}
+}
 
 func TestSystem_rootNode(t *testing.T) {
 	var (
