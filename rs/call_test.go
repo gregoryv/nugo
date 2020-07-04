@@ -101,17 +101,17 @@ func TestSyscall_Create(t *testing.T) {
 	bad(asAnonymous.Create("/file"))
 }
 
-func TestSyscall_Mkdir(t *testing.T) {
+func TestSyscall_mkdir(t *testing.T) {
 	var (
 		asRoot      = Root.Use(NewSystem())
 		asAnonymous = Anonymous.Use(NewSystem())
 		ok, bad     = asserter.NewMixed(t)
 	)
-	ok(asRoot.Mkdir("/adir", 0))
+	ok(asRoot.mkdir("/adir", 0))
 	// parent directory missing
-	bad(asRoot.Mkdir("/nosuch/whatever", 0))
+	bad(asRoot.mkdir("/nosuch/whatever", 0))
 	// inadequate permission
-	bad(asAnonymous.Mkdir("/whatever", 0))
+	bad(asAnonymous.mkdir("/whatever", 0))
 }
 
 func TestSyscall_Exec(t *testing.T) {

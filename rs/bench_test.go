@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func BenchmarkSyscall_Mkdir(b *testing.B) {
+func BenchmarkSyscall_mkdir(b *testing.B) {
 	var (
 		sys = &Syscall{System: NewSystem(), acc: Root}
 	)
 	for i := 0; i < b.N; i++ {
-		sys.Mkdir(fmt.Sprintf("/dir%d", i), 0)
+		sys.mkdir(fmt.Sprintf("/dir%d", i), 0)
 	}
 }

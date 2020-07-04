@@ -10,8 +10,8 @@ import (
 )
 
 type Syscall struct {
-	*System
-	acc *Account
+	*System // probably should hide this
+	acc     *Account
 }
 
 // RemoveAll
@@ -158,9 +158,9 @@ type Executable interface {
 	Exec(*Cmd) error
 }
 
-// Mkdir creates the absolute path whith a given mode where the parent
+// mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) Mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
+func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.stat(dir)
 	if err != nil {
@@ -204,5 +204,13 @@ func wrap(prefix string, err error) error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", prefix, err)
 	}
+	return nil
+}
+
+// mount creates a root node for the given path.
+func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
+	rn := nugo.NewRootNode(abspath, mode)
+	rn.SetSeal(me.acc.uid, me.acc.gid(), 01755)
+	me.System.rn = rn
 	return nil
 }

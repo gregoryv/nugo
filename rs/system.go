@@ -6,6 +6,8 @@ as source or implement the Executable interface. Using the Save and
 Load syscalls, structs are gob encoded and decoded to an access
 controlled resource.
 
+Anonymous account has uid,gid 0,0 whereas the Root account 1,1.
+
 */
 package rs
 
@@ -15,18 +17,21 @@ import (
 	"github.com/gregoryv/nugo"
 )
 
-// NewSystem returns a system with a default resources resembling a
+// NewSystem returns a system with installed resources resembling a
 // unix filesystem.
 func NewSystem() *System {
-	rnMode := nugo.ModeDir | nugo.ModeSort | nugo.ModeDistinct
-	rn := nugo.NewRootNode("/", rnMode)
-	rn.SetSeal(1, 1, 01755)
-	rn.Make("bin")
-
-	sys := &System{
-		rn: rn,
-	}
+	sys := &System{}
 	asRoot := Root.Use(sys)
+	asRoot.mount("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
+	installSys(sys)
+	return sys
+}
+
+// installSys creates default resources on the system. Should only be
+// called once on one system.
+func installSys(sys *System) {
+	asRoot := Root.Use(sys)
+	asRoot.mkdir("/bin", 01755)
 	asRoot.Install("/bin/mkdir", &mkdirCmd{}, 00755)
 
 	// Order is important until mkdir supports -p flag
@@ -39,9 +44,8 @@ func NewSystem() *System {
 		{"/tmp", "07777"},
 	}
 	for _, d := range dirs {
-		asRoot.Exec(NewCmd("/bin/mkdir", "-m", d.mode, d.abspath))
+		asRoot.ExecCmd("/bin/mkdir", "-m", d.mode, d.abspath)
 	}
-	return sys
 }
 
 type System struct {

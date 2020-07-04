@@ -31,6 +31,9 @@ type Account struct {
 	groups []int
 }
 
+// gid returns the first group id of the account
+func (my *Account) gid() int { return my.groups[0] }
+
 // todo hide as command
 func (me *Account) AddGroup(gid int) {
 	for _, id := range me.groups {
