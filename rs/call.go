@@ -211,6 +211,5 @@ func wrap(prefix string, err error) error {
 func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
 	rn := nugo.NewRootNode(abspath, mode)
 	rn.SetSeal(me.acc.uid, me.acc.gid(), 01755)
-	me.System.rn = rn
-	return nil
+	return me.System.mount(rn)
 }

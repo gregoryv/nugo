@@ -12,7 +12,10 @@ Anonymous account has uid,gid 0,0 whereas the Root account 1,1.
 package rs
 
 import (
+	"fmt"
 	"io"
+	"path"
+	"strings"
 
 	"github.com/gregoryv/nugo"
 )
@@ -20,7 +23,9 @@ import (
 // NewSystem returns a system with installed resources resembling a
 // unix filesystem.
 func NewSystem() *System {
-	sys := &System{}
+	sys := &System{
+		mounts: make(map[string]*nugo.RootNode),
+	}
 	asRoot := Root.Use(sys)
 	asRoot.mount("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
 	installSys(sys)
@@ -39,18 +44,35 @@ func installSys(sys *System) {
 }
 
 type System struct {
-	rn *nugo.RootNode
+	mounts map[string]*nugo.RootNode
 }
 
-// Use returns a syscall for the given account
-func (me *System) Use(acc *Account) *Syscall {
-	return &Syscall{System: me, acc: acc}
+func (me *System) mount(rn *nugo.RootNode) error {
+	abspath := path.Clean(rn.Name())
+	if _, found := me.mounts[abspath]; found {
+		return fmt.Errorf("mount: %s already exists", abspath)
+	}
+	me.mounts[abspath] = rn
+	return nil
 }
 
 // rootNode returns the mounting point of the abspath. Currently only
 // "/" is available.
 func (me *System) rootNode(abspath string) *nugo.RootNode {
-	return me.rn
+	rn := me.mounts["/"]
+	for p, n := range me.mounts {
+		if strings.Index(abspath, p) == 0 {
+			if len(n.Name()) > len(rn.Name()) {
+				rn = n
+			}
+		}
+	}
+	return rn
+}
+
+// Use returns a syscall for the given account
+func (me *System) Use(acc *Account) *Syscall {
+	return &Syscall{System: me, acc: acc}
 }
 
 // dumprs writes the entire graph

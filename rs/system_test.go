@@ -3,7 +3,34 @@ package rs
 import (
 	"fmt"
 	"os"
+	"testing"
+
+	"github.com/gregoryv/asserter"
+	"github.com/gregoryv/nugo"
 )
+
+func TestSystem_rootNode(t *testing.T) {
+	var (
+		sys = NewSystem()
+		_   = sys.mount(nugo.NewRoot("/mnt"))
+		_   = sys.mount(nugo.NewRoot("/mnt/usb"))
+	)
+	if rn := sys.rootNode("/mnt/usb/some/path"); rn.Name() != "/mnt/usb" {
+		t.Fail()
+	}
+	if rn := sys.rootNode("/nosuch/dir"); rn.Name() != "/" {
+		t.Fail()
+	}
+}
+
+func TestSystem_mount(t *testing.T) {
+	var (
+		sys     = NewSystem()
+		ok, bad = asserter.NewErrors(t)
+	)
+	bad(sys.mount(nugo.NewRoot("/")))
+	ok(sys.mount(nugo.NewRoot("/mnt/usb")))
+}
 
 func Example_newSystem() {
 	NewSystem().dumprs(os.Stdout)

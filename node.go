@@ -81,7 +81,7 @@ func mChar(m, mask NodeMode, c byte) byte {
 	return '-'
 }
 
-// newNode returns a new node with the given name url path escaped.
+// NewNode returns a new node with the given name url path escaped.
 func NewNode(name string) *Node {
 	safe := url.PathEscape(name)
 	return &Node{name: safe}
