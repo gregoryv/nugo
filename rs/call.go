@@ -16,7 +16,7 @@ type Syscall struct {
 
 // RemoveAll
 func (me *Syscall) RemoveAll(abspath string) error {
-	rn := me.mounts(abspath)
+	rn := me.rootNode(abspath)
 	nodes, err := rn.Locate(abspath)
 	if err != nil {
 		return wrap("RemoveAll", err)
@@ -187,7 +187,7 @@ func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
 // stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
 func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
-	rn := me.mounts(abspath)
+	rn := me.rootNode(abspath)
 	nodes, err := rn.Locate(abspath)
 	if err != nil {
 		return nil, err

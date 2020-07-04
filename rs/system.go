@@ -32,20 +32,10 @@ func NewSystem() *System {
 func installSys(sys *System) {
 	asRoot := Root.Use(sys)
 	asRoot.mkdir("/bin", 01755)
+	asRoot.mkdir("/etc", 00755)
+	asRoot.mkdir("/etc/accounts", 00755)
+	asRoot.mkdir("/tmp", 07777)
 	asRoot.Install("/bin/mkdir", &mkdirCmd{}, 00755)
-
-	// Order is important until mkdir supports -p flag
-	dirs := []struct {
-		abspath string
-		mode    string
-	}{
-		{"/etc", "00755"},
-		{"/etc/accounts", "00755"},
-		{"/tmp", "07777"},
-	}
-	for _, d := range dirs {
-		asRoot.ExecCmd("/bin/mkdir", "-m", d.mode, d.abspath)
-	}
 }
 
 type System struct {
@@ -57,13 +47,13 @@ func (me *System) Use(acc *Account) *Syscall {
 	return &Syscall{System: me, acc: acc}
 }
 
-// mounts returns the mounting point of the abspath. Currently only
+// rootNode returns the mounting point of the abspath. Currently only
 // "/" is available.
-func (me *System) mounts(abspath string) *nugo.RootNode {
+func (me *System) rootNode(abspath string) *nugo.RootNode {
 	return me.rn
 }
 
 // dumprs writes the entire graph
 func (me *System) dumprs(w io.Writer) {
-	me.mounts("/").Walk(nugo.NodePrinter(w))
+	me.rootNode("/").Walk(nugo.NodePrinter(w))
 }
