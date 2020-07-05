@@ -376,8 +376,8 @@ type Walker struct {
 // Stop the Walker from your visitor.
 func (me *Walker) Stop() { me.stopped = true }
 
-// Walk calls the Visitor for the given node. The abspath should be
-// that of the parent. Use empty string for root nugo.
+// Walk calls the Visitor for the given node. The abspath is
+// that of the child. Use empty string for root node.
 func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 	if child == nil || w.stopped {
 		return
