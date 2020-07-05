@@ -239,6 +239,9 @@ func (me *Node) LastChild() *Node {
 // Child returns child of this node.
 func (my *Node) Child() *Node { return my.child }
 
+// Sibling
+func (my *Node) Sibling() *Node { return my.sibling }
+
 // DelChild removes the first child with the given name and returns the
 // removed node
 func (me *Node) DelChild(name string) *Node {

@@ -36,6 +36,15 @@ func TestRootNode_Child(t *testing.T) {
 	assert(n == nil).Error("expect no child")
 }
 
+func TestRootNode_Sibling(t *testing.T) {
+	var (
+		rn     = NewRootNode("/", ModeDir)
+		n      = rn.Sibling()
+		assert = asserter.New(t)
+	)
+	assert(n == nil).Error("expect no sibling")
+}
+
 func ExampleNode_UnsetMode() {
 	var (
 		n = NewNode("node")
