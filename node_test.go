@@ -9,6 +9,17 @@ import (
 	"github.com/gregoryv/fox"
 )
 
+func TestNode_Copy(t *testing.T) {
+	var (
+		n = &Node{src: 1}
+		c = n.Copy()
+	)
+	n.src = 2
+	if n.src == c.src {
+		t.Fail()
+	}
+}
+
 func TestNode_Source(t *testing.T) {
 	var (
 		n      = &Node{src: 1}

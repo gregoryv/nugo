@@ -242,6 +242,15 @@ func (my *Node) Child() *Node { return my.child }
 // Sibling
 func (my *Node) Sibling() *Node { return my.sibling }
 
+// Copy returns a copy of the node without relations and no source.
+func (me *Node) Copy() *Node {
+	cp := *me
+	cp.child = nil
+	cp.sibling = nil
+	cp.src = nil
+	return &cp
+}
+
 // DelChild removes the first child with the given name and returns the
 // removed node
 func (me *Node) DelChild(name string) *Node {
