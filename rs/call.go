@@ -187,7 +187,8 @@ func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	return &ResInfo{node: n}, nil
 }
 
-// ls returns a list of nodes (copies) for
+// ls returns a list of nodes (copies). If abspath is a directory it's
+// children are returned.
 func (me *Syscall) ls(abspath string) ([]*nugo.Node, error) {
 	n, err := me.stat(abspath)
 	if err != nil {

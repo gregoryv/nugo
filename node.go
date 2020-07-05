@@ -359,12 +359,12 @@ func (me *RootNode) Locate(abspath string) ([]*Node, error) {
 // Walk over each node until Walker is stopped. Same as
 //   NewWalker().Walk(root, "", fn)
 func (me *RootNode) Walk(fn Visitor) {
-	newWalker().Walk(nil, me.Node, "", fn)
+	NewWalker().Walk(nil, me.Node, "", fn)
 }
 
 // ----------------------------------------
 
-func newWalker() *Walker {
+func NewWalker() *Walker {
 	return &Walker{}
 }
 
