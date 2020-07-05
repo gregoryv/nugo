@@ -187,6 +187,26 @@ func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	return &ResInfo{node: n}, nil
 }
 
+// ls returns a list of nodes (copies) for
+func (me *Syscall) ls(abspath string) ([]*nugo.Node, error) {
+	n, err := me.stat(abspath)
+	if err != nil {
+		return nil, err
+	}
+	nodes := make([]*nugo.Node, 0)
+	if !n.IsDir() {
+		nodes = append(nodes, n.Copy())
+		return nodes, nil
+	}
+	// list children of directory
+	c := n.FirstChild()
+	for c != nil {
+		nodes = append(nodes, c.Copy())
+		c = c.Sibling()
+	}
+	return nodes, nil
+}
+
 // Stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
 func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
@@ -198,7 +218,7 @@ func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
 }
 
 // stat returns the node of the abspath if account is allowed to reach
-// it, ie. all nodes up to it must have execute flags set.
+// it, ie. all nodes up to it must have execute mode set.
 func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 	rn := me.rootNode(abspath)
 	nodes, err := rn.Locate(abspath)

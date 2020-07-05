@@ -3,6 +3,7 @@ package rs
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
 
@@ -11,7 +12,8 @@ import (
 
 // NewCmd returns a new command.
 func NewCmd(abspath string, args ...string) *Cmd {
-	return &Cmd{Abspath: abspath, Args: args}
+	return &Cmd{
+		Abspath: abspath, Args: args, Out: ioutil.Discard}
 }
 
 type Cmd struct {
@@ -20,6 +22,8 @@ type Cmd struct {
 
 	// Access to system with a specific account
 	Sys *Syscall
+
+	Out io.Writer
 }
 
 // String
@@ -42,4 +46,27 @@ func (me *mkdirCmd) Exec(c *Cmd) error {
 	abspath := flags.Arg(0)
 	_, err := c.Sys.mkdir(abspath, nugo.NodeMode(*mode))
 	return err
+}
+
+// ----------------------------------------
+
+type lsCmd struct{}
+
+// Exec
+func (me *lsCmd) Exec(c *Cmd) error {
+	flags := flag.NewFlagSet("ls", flag.ContinueOnError)
+	flags.Usage = func() {}
+	flags.SetOutput(ioutil.Discard)
+	if err := flags.Parse(c.Args); err != nil {
+		return err
+	}
+	abspath := flags.Arg(0)
+	nodes, err := c.Sys.ls(abspath)
+	if err != nil {
+		return err
+	}
+	for _, n := range nodes {
+		fmt.Fprintf(c.Out, "%s\n", n)
+	}
+	return nil
 }

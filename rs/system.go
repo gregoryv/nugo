@@ -42,6 +42,7 @@ func installSys(sys *System) {
 	asRoot.mkdir("/etc/accounts", 00755)
 	asRoot.mkdir("/tmp", 07777)
 	asRoot.Install("/bin/mkdir", &mkdirCmd{}, 00755)
+	asRoot.Install("/bin/ls", &lsCmd{}, 00755)
 }
 
 type System struct {
