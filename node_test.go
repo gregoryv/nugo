@@ -6,14 +6,11 @@ import (
 	"testing"
 
 	"github.com/gregoryv/asserter"
-	"github.com/gregoryv/fox"
 )
 
 func TestNode_Copy(t *testing.T) {
-	var (
-		n = &Node{src: 1}
-		c = n.Copy()
-	)
+	n := &Node{src: 1}
+	c := n.Copy()
 	n.src = 2
 	if n.src == c.src {
 		t.Fail()
@@ -21,45 +18,33 @@ func TestNode_Copy(t *testing.T) {
 }
 
 func TestNode_Source(t *testing.T) {
-	var (
-		n      = &Node{src: 1}
-		assert = asserter.New(t)
-	)
+	n := &Node{src: 1}
+	assert := asserter.New(t)
 	assert(n.Source() != nil).Error("nil Source")
 }
 
 func TestNode_IsDir(t *testing.T) {
-	var (
-		file   = &Node{}
-		dir    = &Node{mode: ModeDir}
-		assert = asserter.New(t)
-	)
+	file := &Node{}
+	dir := &Node{mode: ModeDir}
+	assert := asserter.New(t)
 	assert(!file.IsDir())
 	assert(dir.IsDir())
 }
 
 func TestRootNode_Child(t *testing.T) {
-	var (
-		rn     = NewRootNode("/", ModeDir)
-		n      = rn.Child()
-		assert = asserter.New(t)
-	)
-	assert(n == nil).Error("expect no child")
+	rn := NewRootNode("/", ModeDir)
+	assert := asserter.New(t)
+	assert(rn.Child() == nil).Error("expect no child")
 }
 
 func TestRootNode_Sibling(t *testing.T) {
-	var (
-		rn     = NewRootNode("/", ModeDir)
-		n      = rn.Sibling()
-		assert = asserter.New(t)
-	)
-	assert(n == nil).Error("expect no sibling")
+	rn := NewRootNode("/", ModeDir)
+	assert := asserter.New(t)
+	assert(rn.Sibling() == nil).Error("expect no sibling")
 }
 
 func ExampleNode_UnsetMode() {
-	var (
-		n = NewNode("node")
-	)
+	n := NewNode("node")
 	n.mode = ModeDir | 01755
 	fmt.Println(n)
 	n.UnsetMode(ModeDir)
@@ -70,9 +55,7 @@ func ExampleNode_UnsetMode() {
 }
 
 func TestNode_SetSource(t *testing.T) {
-	var (
-		n = NewNode("val")
-	)
+	n := NewNode("val")
 	n.SetSource(1)
 	if n.src.(int) != 1 {
 		t.Fail()
@@ -95,7 +78,7 @@ func TestRootNode_Locate(t *testing.T) {
 	rn.Make("etc")
 	bin.Make("mkdir")
 	_, bad := asserter.NewMixed(t)
-
+	//
 	b, err := rn.Locate("/bin/mkdir")
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +96,6 @@ func ExampleRootNode_Locate() {
 	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
 	root.MakeAll("etc", "tmp")
-
 	nodes, _ := root.Locate("/etc")
 	for _, node := range nodes {
 		fmt.Println(node)
@@ -121,27 +103,6 @@ func ExampleRootNode_Locate() {
 	// output:
 	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 etc
-}
-
-func ExampleNodePrinter() {
-	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	root.SetSeal(1, 1, 01755)
-	root.Make("etc") // inherits parent mode
-	root.Walk(NodePrinter(os.Stdout))
-	// output:
-	// d--xrwxr-xr-x 1 1 /
-	// d--xrwxr-xr-x 1 1 /etc
-}
-
-func ExampleNodeLogger() {
-	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	root.SetSeal(1, 1, 01755)
-	root.Make("etc") // inherits parent mode
-	l := fox.NewSyncLog(os.Stdout)
-	root.Walk(NodeLogger(l))
-	// output:
-	// d--xrwxr-xr-x 1 1 /
-	// d--xrwxr-xr-x 1 1 /etc
 }
 
 func Example_sortedDistinct() {
@@ -204,7 +165,7 @@ func ExampleNode_FirstChild_listAllChildren() {
 	// b
 }
 
-func ExampleWalk() {
+func ExampleRootNode_Walk() {
 	root := NewRoot("/")
 	root.MakeAll("a", "c")
 	root.Find("/a").MakeAll("b", "1")
