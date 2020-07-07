@@ -20,23 +20,23 @@ func TestSyscall_RemoveAll(t *testing.T) {
 		_           = asRoot.SaveAs("/tmp/alien", &Alien{Name: "RemoveAll"})
 		ok, bad     = asserter.NewErrors(t)
 	)
-	bad(asRoot.RemoveAll("/tmp/nosuch"))
 	ok(asRoot.RemoveAll("/tmp/alien"))
+	bad(asRoot.RemoveAll("/tmp/nosuch"))
 	bad(asAnonymous.RemoveAll("/etc/accounts"))
 }
 
 func TestSyscall_Load(t *testing.T) {
 	var (
 		asRoot  = Root.Use(NewSystem())
-		thing   = Alien{Name: "Mr green"}
+		alien   = Alien{Name: "Mr green"}
 		got     Alien
 		ok, bad = asserter.NewErrors(t)
 		assert  = asserter.New(t)
 	)
-	ok(asRoot.Save("/thing.gob", &thing))
-	bad(asRoot.Load(&got, "/nosuch"))
+	ok(asRoot.Save("/thing.gob", &alien))
 	ok(asRoot.Load(&got, "/thing.gob"))
 	assert(got.Name == "Mr green").Errorf("%v", got)
+	bad(asRoot.Load(&got, "/nosuch"))
 	bad(asRoot.Load(&got, "/bin/mkdir"))
 }
 

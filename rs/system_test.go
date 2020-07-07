@@ -31,11 +31,9 @@ func TestSystem_SetAuditer(t *testing.T) {
 }
 
 func TestSystem_rootNode(t *testing.T) {
-	var (
-		sys = NewSystem()
-		_   = sys.mount(nugo.NewRoot("/mnt"))
-		_   = sys.mount(nugo.NewRoot("/mnt/usb"))
-	)
+	sys := NewSystem()
+	sys.mount(nugo.NewRoot("/mnt"))
+	sys.mount(nugo.NewRoot("/mnt/usb"))
 	if rn := sys.rootNode("/mnt/usb/some/path"); rn.Name() != "/mnt/usb" {
 		t.Fail()
 	}
@@ -45,22 +43,16 @@ func TestSystem_rootNode(t *testing.T) {
 }
 
 func TestSystem_mount(t *testing.T) {
-	var (
-		sys     = NewSystem()
-		ok, bad = asserter.NewErrors(t)
-	)
+	sys := NewSystem()
+	ok, bad := asserter.NewErrors(t)
 	bad(sys.mount(nugo.NewRoot("/")))
 	ok(sys.mount(nugo.NewRoot("/mnt/usb")))
 }
 
 func Example_saveAndLoadResource() {
-	var (
-		sys    = NewSystem()
-		asRoot = Root.Use(sys)
-	)
+	asRoot := Root.Use(NewSystem())
 	asRoot.ExecCmd("/bin/mkdir", "/tmp/aliens")
 	asRoot.Save("/tmp/aliens/green.gob", &Alien{Name: "Mr Green"})
-
 	var alien Alien
 	asRoot.Load(&alien, "/tmp/aliens/green.gob")
 	fmt.Printf("%#v", alien)
