@@ -41,25 +41,28 @@ func TestSyscall_Exec_ls(t *testing.T) {
 
 func Example_binLs() {
 	asRoot := Root.Use(NewSystem())
-	ls := NewCmd("/bin/ls", "/")
+	ls := NewCmd("/bin/ls", "-R", "/")
 	ls.Out = os.Stdout
 	asRoot.Exec(ls)
 	// output:
 	// d--xrwxr-xr-x 1 1 bin
+	// ----rwxr-xr-x 1 1 bin/ls
+	// ----rwxr-xr-x 1 1 bin/mkdir
 	// d---rwxr-xr-x 1 1 etc
+	// d---rwxr-xr-x 1 1 etc/accounts
 	// drwxrwxrwxrwx 1 1 tmp
 }
 
 func ExampleAccount_Exec_lsRecursive() {
 	sys := NewSystem()
+	// hide etc
 	asRoot := Root.Use(sys)
 	n, _ := asRoot.stat("/etc")
 	n.SetPerm(0)
+	// recursive ls
 	ls := NewCmd("/bin/ls", "-R", "/")
 	ls.Out = os.Stdout
-
-	asJohn := NewAccount("john", 2).Use(sys)
-	asJohn.Exec(ls)
+	NewAccount("john", 2).Use(sys).Exec(ls)
 	// output:
 	// d--xrwxr-xr-x 1 1 bin
 	// ----rwxr-xr-x 1 1 bin/ls

@@ -26,7 +26,7 @@ type Cmd struct {
 	Out io.Writer
 }
 
-// String
+// String returns the command with its arguments
 func (me *Cmd) String() string {
 	return fmt.Sprintf("%s %s", me.Abspath, strings.Join(me.Args, " "))
 }

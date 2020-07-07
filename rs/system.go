@@ -13,7 +13,6 @@ package rs
 
 import (
 	"fmt"
-	"io"
 	"path"
 	"strings"
 
@@ -77,9 +76,4 @@ func (me *System) rootNode(abspath string) *nugo.RootNode {
 		}
 	}
 	return rn
-}
-
-// dumprs writes the entire graph
-func (me *System) dumprs(w io.Writer) {
-	me.rootNode("/").Walk(nugo.NodePrinter(w))
 }
