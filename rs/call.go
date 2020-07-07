@@ -187,27 +187,6 @@ func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 	return &ResInfo{node: n}, nil
 }
 
-// ls returns a list of nodes (copies). If abspath is a directory it's
-// children are returned.
-func (me *Syscall) ls(abspath string) ([]*nugo.Node, error) {
-	n, err := me.stat(abspath)
-	if err != nil {
-		return nil, err
-	}
-	nodes := make([]*nugo.Node, 0)
-	if !n.IsDir() {
-		nodes = append(nodes, n.Copy())
-		return nodes, nil
-	}
-	// list children of directory
-	c := n.FirstChild()
-	for c != nil {
-		nodes = append(nodes, c.Copy())
-		c = c.Sibling()
-	}
-	return nodes, nil
-}
-
 // Stat returns the node of the abspath if account is allowed to reach
 // it, ie. all nodes up to it must have execute flags set.
 func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
@@ -247,3 +226,42 @@ func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
 	rn.SetSeal(me.acc.uid, me.acc.gid(), 01755)
 	return me.System.mount(rn)
 }
+
+func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
+	w := nugo.NewWalker()
+	w.SetRecursive(recursive)
+	rn := me.rootNode(abspath)
+	nodes, err := rn.Locate(abspath)
+	if err != nil {
+		return err
+	}
+	// wrap the visitor with access control
+	visitor := func(parent, child *nugo.Node, abspath string, w *nugo.Walker) {
+		n := parent
+		if parent == nil {
+			n = child
+		}
+		if me.acc.permitted(OpExec, n.Seal()) != nil {
+			// skip
+			return
+		}
+		var p *ResInfo
+		if parent != nil {
+			p = &ResInfo{parent}
+		}
+		c := &ResInfo{child}
+		fn(p, c, abspath, w)
+	}
+	child := nodes[len(nodes)-1]
+	var parent *nugo.Node
+	if len(nodes) > 1 {
+		parent = nodes[len(nodes)-2]
+	}
+	w.Walk(parent, child, path.Dir(abspath), visitor)
+	return nil
+}
+
+// Visitor is called during a walk with a specific node and the
+// absolute path to that node. Use the given Walker to stop if needed.
+// For root nodes the parent is nil.
+type Visitor func(parent, child *ResInfo, abspath string, w *nugo.Walker)

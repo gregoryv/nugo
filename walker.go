@@ -8,27 +8,37 @@ import (
 	"github.com/gregoryv/fox"
 )
 
+// NewWalker returns a recursive walker
 func NewWalker() *Walker {
-	return &Walker{}
+	return &Walker{
+		recursive: true,
+	}
 }
 
 // Walker holds state of a walk.
 type Walker struct {
+	recursive bool
 	stopped bool
 }
 
 // Stop the Walker from your visitor.
 func (me *Walker) Stop() { me.stopped = true }
 
+// SetRecursive
+func (me *Walker) SetRecursive(r bool)  { me.recursive = r }
+
+
 // Walk calls the Visitor for the given node. The abspath is
 // that of the child. Use empty string for root node.
-func (w *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
-	if child == nil || w.stopped {
+func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
+	if child == nil || me.stopped {
 		return
 	}
-	fn(parent, child, path.Join(abspath, child.Name()), w)
-	w.Walk(child, child.child, path.Join(abspath, child.Name()), fn)
-	w.Walk(parent, child.sibling, abspath, fn)
+	fn(parent, child, path.Join(abspath, child.Name()), me)
+	if parent == nil || me.recursive {
+		me.Walk(child, child.child, path.Join(abspath, child.Name()), fn)
+	}
+	me.Walk(parent, child.sibling, abspath, fn)
 }
 
 // Visitor is called during a walk with a specific node and the

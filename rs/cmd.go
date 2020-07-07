@@ -53,20 +53,25 @@ func (me *mkdirCmd) Exec(c *Cmd) error {
 type lsCmd struct{}
 
 // Exec
-func (me *lsCmd) Exec(c *Cmd) error {
+func (me *lsCmd) Exec(cmd *Cmd) error {
 	flags := flag.NewFlagSet("ls", flag.ContinueOnError)
+	recursive := flags.Bool("R", false, "recursive")
 	flags.Usage = func() {}
 	flags.SetOutput(ioutil.Discard)
-	if err := flags.Parse(c.Args); err != nil {
+	if err := flags.Parse(cmd.Args); err != nil {
 		return err
 	}
 	abspath := flags.Arg(0)
-	nodes, err := c.Sys.ls(abspath)
-	if err != nil {
-		return err
+	visitor := func(p, c *ResInfo, abspath string, w *nugo.Walker) {
+		switch {
+		case p == nil:
+			// only when ls -al
+			// fmt.Fprintf(cmd.Out, "%s .\n", c.node.Seal())
+		case *recursive:
+			fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
+		default:
+			fmt.Fprintf(cmd.Out, "%s\n", c.node)
+		}
 	}
-	for _, n := range nodes {
-		fmt.Fprintf(c.Out, "%s\n", n)
-	}
-	return nil
+	return cmd.Sys.Walk(abspath, *recursive, visitor)
 }
