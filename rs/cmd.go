@@ -39,6 +39,11 @@ type ExecFunc func(*Cmd) error
 
 func (me ExecFunc) ExecCmd(cmd *Cmd) error { return me(cmd) }
 
+// Chmod
+func (me *Bin) Chmod(cmd *Cmd) error {
+	return nil
+}
+
 // Mkdir creates directories
 func (me *Bin) Mkdir(cmd *Cmd) error {
 	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
@@ -64,8 +69,7 @@ func (me *Bin) Ls(cmd *Cmd) error {
 	visitor := func(p, c *ResInfo, abspath string, w *nugo.Walker) {
 		switch {
 		case p == nil:
-			// only when ls -al
-			// fmt.Fprintf(cmd.Out, "%s .\n", c.node.Seal())
+			fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), c.Name())
 		case *recursive:
 			fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
 		default:

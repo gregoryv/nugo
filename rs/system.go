@@ -41,8 +41,9 @@ func installSys(sys *System) {
 	asRoot.Mkdir("/etc/accounts", 00755)
 	asRoot.Mkdir("/tmp", 07777)
 	bin := &Bin{}
+	asRoot.Install("/bin/chmod", ExecFunc(bin.Chmod), 00755)
 	asRoot.Install("/bin/mkdir", ExecFunc(bin.Mkdir), 00755)
-	asRoot.Install("/bin/ls", ExecFunc(bin.Ls), 00755)
+	asRoot.Install("/bin/ls", ExecFunc(bin.Ls), 01755)
 	asRoot.Save("/etc/accounts/anonymous.acc", Anonymous)
 	asRoot.Save("/etc/accounts/root.acc", Root)
 }
