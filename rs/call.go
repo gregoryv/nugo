@@ -171,9 +171,11 @@ type Executable interface {
 	Exec(*Cmd) error
 }
 
-// mkdir creates the absolute path whith a given mode where the parent
+type Mode nugo.NodeMode
+
+// Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
-func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
+func (me *Syscall) Mkdir(abspath string, mode Mode) (*ResInfo, error) {
 	dir, name := path.Split(abspath)
 	parent, err := me.stat(dir)
 	if err != nil {
@@ -183,7 +185,7 @@ func (me *Syscall) mkdir(abspath string, mode nugo.NodeMode) (*ResInfo, error) {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
 	n := parent.Make(name)
-	n.SetPerm(mode)
+	n.SetPerm(nugo.NodeMode(mode))
 	return &ResInfo{node: n}, nil
 }
 

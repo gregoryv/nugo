@@ -36,10 +36,10 @@ func NewSystem() *System {
 // called once on one system.
 func installSys(sys *System) {
 	asRoot := Root.Use(sys)
-	asRoot.mkdir("/bin", 01755)
-	asRoot.mkdir("/etc", 00755)
-	asRoot.mkdir("/etc/accounts", 00755)
-	asRoot.mkdir("/tmp", 07777)
+	asRoot.Mkdir("/bin", 01755)
+	asRoot.Mkdir("/etc", 00755)
+	asRoot.Mkdir("/etc/accounts", 00755)
+	asRoot.Mkdir("/tmp", 07777)
 	asRoot.Install("/bin/mkdir", &mkdirCmd{}, 00755)
 	asRoot.Install("/bin/ls", &lsCmd{}, 00755)
 	asRoot.Save("/etc/accounts/anonymous.acc", Anonymous)

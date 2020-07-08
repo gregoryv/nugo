@@ -44,7 +44,7 @@ func (me *mkdirCmd) Exec(c *Cmd) error {
 		return err
 	}
 	abspath := flags.Arg(0)
-	_, err := c.Sys.mkdir(abspath, nugo.NodeMode(*mode))
+	_, err := c.Sys.Mkdir(abspath, Mode(*mode))
 	return err
 }
 
