@@ -242,7 +242,7 @@ func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
 			n = child
 		}
 		if me.acc.permitted(OpExec, n.Seal()) != nil {
-			// skip
+			w.Skip()
 			return
 		}
 		var p *ResInfo
