@@ -33,31 +33,30 @@ func (me *Cmd) String() string {
 
 // ----------------------------------------
 
-type mkdirCmd struct{}
+type Bin struct{}
 
-func (me *mkdirCmd) Exec(c *Cmd) error {
+type ExecFunc func(*Cmd) error
+
+func (me ExecFunc) Exec(cmd *Cmd) error { return me(cmd) }
+
+// Mkdir creates directories
+func (me *Bin) Mkdir(cmd *Cmd) error {
 	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
-	flags.Usage = func() {}
-	flags.SetOutput(ioutil.Discard)
+	flags.SetOutput(cmd.Out)
 	mode := flags.Uint("m", 00755, "mode for new directory")
-	if err := flags.Parse(c.Args); err != nil {
+	if err := flags.Parse(cmd.Args); err != nil {
 		return err
 	}
 	abspath := flags.Arg(0)
-	_, err := c.Sys.Mkdir(abspath, Mode(*mode))
+	_, err := cmd.Sys.Mkdir(abspath, Mode(*mode))
 	return err
 }
 
-// ----------------------------------------
-
-type lsCmd struct{}
-
-// Exec
-func (me *lsCmd) Exec(cmd *Cmd) error {
+// Ls lists resources
+func (me *Bin) Ls(cmd *Cmd) error {
 	flags := flag.NewFlagSet("ls", flag.ContinueOnError)
 	recursive := flags.Bool("R", false, "recursive")
-	flags.Usage = func() {}
-	flags.SetOutput(ioutil.Discard)
+	flags.SetOutput(cmd.Out)
 	if err := flags.Parse(cmd.Args); err != nil {
 		return err
 	}

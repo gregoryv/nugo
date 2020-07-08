@@ -8,38 +8,25 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
-func TestSyscall_Exec_ls(t *testing.T) {
-	var (
-		sys     = NewSystem()
-		asRoot  = Root.Use(sys)
-		ok, bad = asserter.NewErrors(t)
-		buf     bytes.Buffer
-	)
+func TestBin_Ls(t *testing.T) {
+	asRoot := Root.Use(NewSystem())
+	ok, bad := asserter.NewErrors(t)
 	bad(asRoot.ExecCmd("/bin/ls", "-xx"))
 	bad(asRoot.ExecCmd("/bin/ls", "/nosuch"))
-
-	// ls directory
-	ls := NewCmd("/bin/ls", "-R", "/")
+	// ls directory is covered by Examples
+	// ls file
+	asRoot.Save("/tmp/alien", &Alien{Name: "red"})
+	ls := NewCmd("/bin/ls", "/tmp/alien")
+	var buf bytes.Buffer
 	ls.Out = &buf
 	ok(asRoot.Exec(ls))
 	got := buf.String()
 	if got == "" {
 		t.Error("missing output")
 	}
-
-	// ls file
-	asRoot.Save("/tmp/alien", &Alien{Name: "red"})
-	buf.Reset()
-	ls = NewCmd("/bin/ls", "/tmp/alien")
-	ls.Out = &buf
-	ok(asRoot.Exec(ls))
-	got = buf.String()
-	if got == "" {
-		t.Error("missing output")
-	}
 }
 
-func Example_binLs() {
+func ExampleBin_Ls() {
 	asJohn := NewAccount("john", 2).Use(NewSystem())
 	ls := NewCmd("/bin/ls", "-R", "/")
 	ls.Out = os.Stdout
