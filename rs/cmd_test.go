@@ -9,6 +9,27 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestBin_Chmod(t *testing.T) {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	asAnonymous := Anonymous.Use(sys)
+	ok, bad := asserter.NewErrors(t)
+	ok(asRoot.Exec("/bin/chmod", "-m", "01755", "/tmp"))
+	bad(asAnonymous.Exec("/bin/chmod", "-m", "01755", "/tmp"))
+	bad(asRoot.Exec("/bin/chmod", "-badflag", "01755"))
+	bad(asRoot.Exec("/bin/chmod", "-m", "01755"))
+	bad(asRoot.Exec("/bin/chmod", "-m", "010000", "/tmp"))
+}
+
+func ExampleBin_Chmod() {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	asRoot.Exec("/bin/chmod", "-m", "0", "/tmp")
+	asRoot.Fexec(os.Stdout, "/bin/ls", "/tmp")
+	// output:
+	// d------------ 1 1 tmp
+}
+
 func TestBin_Ls(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)

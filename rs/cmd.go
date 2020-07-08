@@ -41,7 +41,17 @@ func (me ExecFunc) ExecCmd(cmd *Cmd) error { return me(cmd) }
 
 // Chmod
 func (me *Bin) Chmod(cmd *Cmd) error {
-	return nil
+	flags := flag.NewFlagSet("chmod", flag.ContinueOnError)
+	mode := flags.Uint("m", 0, "mode")
+	flags.SetOutput(cmd.Out)
+	if err := flags.Parse(cmd.Args); err != nil {
+		return err
+	}
+	abspath := flags.Arg(0)
+	if abspath == "" {
+		return fmt.Errorf("missing abspath")
+	}
+	return cmd.Sys.SetMode(abspath, Mode(*mode))
 }
 
 // Mkdir creates directories

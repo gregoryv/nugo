@@ -11,10 +11,12 @@ func TestSyscall_SetMode(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
 	asAnonymous := Anonymous.Use(sys)
+	asJohn := NewAccount("john", 2).Use(sys)
 	ok, bad := asserter.NewErrors(t)
 	ok(asRoot.SetMode("/tmp", 0))
 	bad(asRoot.SetMode("/nosuch", 0))
-	bad(asAnonymous.SetMode("/tmp", 0))
+	bad(asAnonymous.SetMode("/etc", 0))
+	bad(asJohn.SetMode("/etc", 0))
 }
 
 // test struct

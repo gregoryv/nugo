@@ -18,6 +18,7 @@ type Syscall struct {
 }
 
 // SetMode sets the mode of abspath if the caller is the owner or Root.
+// Only permissions bits can be set for now.
 func (me *Syscall) SetMode(abspath string, mode Mode) error {
 	n, err := me.stat(abspath)
 	if err != nil {
@@ -26,6 +27,10 @@ func (me *Syscall) SetMode(abspath string, mode Mode) error {
 	if !me.acc.Owns(n.Seal().UID) && me.acc != Root {
 		return fmt.Errorf("SetMode: %v not owner of %s", me.acc.uid, abspath)
 	}
+	if nugo.NodeMode(mode) > nugo.ModePerm {
+		return fmt.Errorf("SetMode: invalid mode")
+	}
+	n.SetPerm(nugo.NodeMode(mode)) // todo add SetMode
 	return nil
 }
 
