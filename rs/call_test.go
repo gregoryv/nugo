@@ -114,18 +114,18 @@ func TestSyscall_Mkdir(t *testing.T) {
 	bad(asAnonymous.Mkdir("/whatever", 0))
 }
 
-func TestSyscall_Exec(t *testing.T) {
+func TestSyscall_ExecCmd(t *testing.T) {
 	var (
-		Exec    = Root.Use(NewSystem()).Exec
+		ExecCmd = Root.Use(NewSystem()).ExecCmd
 		ok, bad = asserter.NewErrors(t)
 	)
-	ok(Exec(NewCmd("/bin/mkdir", "/tmp")))
+	ok(ExecCmd(NewCmd("/bin/mkdir", "/tmp")))
 	// Node not found
-	bad(Exec(NewCmd("/bin/nosuch/mkdir", "/tmp")))
+	bad(ExecCmd(NewCmd("/bin/nosuch/mkdir", "/tmp")))
 	// Resource not type Executable
-	bad(Exec(NewCmd("/bin")))
+	bad(ExecCmd(NewCmd("/bin")))
 	// Bad flag
-	bad(Exec(NewCmd("/bin/mkdir", "-nosuch")))
+	bad(ExecCmd(NewCmd("/bin/mkdir", "-nosuch")))
 }
 
 func ExampleSyscall_Stat() {

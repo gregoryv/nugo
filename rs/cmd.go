@@ -37,7 +37,7 @@ type Bin struct{}
 
 type ExecFunc func(*Cmd) error
 
-func (me ExecFunc) Exec(cmd *Cmd) error { return me(cmd) }
+func (me ExecFunc) ExecCmd(cmd *Cmd) error { return me(cmd) }
 
 // Mkdir creates directories
 func (me *Bin) Mkdir(cmd *Cmd) error {

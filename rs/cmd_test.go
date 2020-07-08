@@ -11,15 +11,15 @@ import (
 func TestBin_Ls(t *testing.T) {
 	asRoot := Root.Use(NewSystem())
 	ok, bad := asserter.NewErrors(t)
-	bad(asRoot.ExecCmd("/bin/ls", "-xx"))
-	bad(asRoot.ExecCmd("/bin/ls", "/nosuch"))
+	bad(asRoot.Exec("/bin/ls", "-xx"))
+	bad(asRoot.Exec("/bin/ls", "/nosuch"))
 	// ls directory is covered by Examples
 	// ls file
 	asRoot.Save("/tmp/alien", &Alien{Name: "red"})
 	ls := NewCmd("/bin/ls", "/tmp/alien")
 	var buf bytes.Buffer
 	ls.Out = &buf
-	ok(asRoot.Exec(ls))
+	ok(asRoot.ExecCmd(ls))
 	got := buf.String()
 	if got == "" {
 		t.Error("missing output")
@@ -28,9 +28,7 @@ func TestBin_Ls(t *testing.T) {
 
 func ExampleBin_Ls() {
 	asJohn := NewAccount("john", 2).Use(NewSystem())
-	ls := NewCmd("/bin/ls", "-R", "/")
-	ls.Out = os.Stdout
-	asJohn.Exec(ls)
+	asJohn.Fexec(os.Stdout, "/bin/ls", "-R", "/")
 	// output:
 	// d--xrwxr-xr-x 1 1 bin
 	// ----rwxr-xr-x 1 1 bin/ls
@@ -42,7 +40,7 @@ func ExampleBin_Ls() {
 	// drwxrwxrwxrwx 1 1 tmp
 }
 
-func ExampleAccount_Exec_lsRecursive() {
+func ExampleAccount_ExecCmd_lsRecursive() {
 	sys := NewSystem()
 	// hide directories
 	asRoot := Root.Use(sys)
@@ -51,7 +49,7 @@ func ExampleAccount_Exec_lsRecursive() {
 	// recursive ls
 	ls := NewCmd("/bin/ls", "-R", "/")
 	ls.Out = os.Stdout
-	NewAccount("john", 2).Use(sys).Exec(ls)
+	NewAccount("john", 2).Use(sys).ExecCmd(ls)
 	// output:
 	// d--xrwxr-xr-x 1 1 bin
 	// ----rwxr-xr-x 1 1 bin/ls

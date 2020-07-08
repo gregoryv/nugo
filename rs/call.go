@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"io"
 	"path"
 
 	"github.com/gregoryv/fox"
@@ -134,15 +135,23 @@ func (me *Syscall) Install(abspath string, cmd Executable, mode nugo.NodeMode,
 	return &ResInfo{node: n}, nil
 }
 
-// ExecCmd creates and executes a new command with system defaults.
-func (me *Syscall) ExecCmd(abspath string, args ...string) error {
-	return me.Exec(NewCmd(abspath, args...))
+// Exec creates and executes a new command with system defaults.
+func (me *Syscall) Exec(abspath string, args ...string) error {
+	return me.ExecCmd(NewCmd(abspath, args...))
 }
 
-// Exec executes the given command. Fails if e.g. resource is not
+// Fexec creates and executes a new command and directs the output to
+// the given writer.
+func (me *Syscall) Fexec(w io.Writer, abspath string, args ...string) error {
+	cmd := NewCmd(abspath, args...)
+	cmd.Out = w
+	return me.ExecCmd(cmd)
+}
+
+// ExecCmd executes the given command. Fails if e.g. resource is not
 // Executable. All exec calls are audited if system has an auditer
 // configured.
-func (me *Syscall) Exec(cmd *Cmd) error {
+func (me *Syscall) ExecCmd(cmd *Cmd) error {
 	n, err := me.stat(cmd.Abspath)
 	if err != nil {
 		return err
@@ -151,7 +160,7 @@ func (me *Syscall) Exec(cmd *Cmd) error {
 	case Executable:
 		// If needed setuid can be checked and enforced here
 		cmd.Sys = me
-		err = src.Exec(cmd)
+		err = src.ExecCmd(cmd)
 		if me.auditer != nil {
 			msg := fmt.Sprintf("%v %s", me.acc.uid, cmd.String())
 			if err != nil {
@@ -168,7 +177,7 @@ func (me *Syscall) Exec(cmd *Cmd) error {
 }
 
 type Executable interface {
-	Exec(*Cmd) error
+	ExecCmd(*Cmd) error
 }
 
 type Mode nugo.NodeMode
