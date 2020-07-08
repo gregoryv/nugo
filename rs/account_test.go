@@ -25,10 +25,10 @@ func TestAccount_DelGroup(t *testing.T) {
 	}
 }
 
-func TestAccount_owns(t *testing.T) {
+func TestAccount_Owns(t *testing.T) {
 	acc := NewAccount("root", 1)
-	if acc.owns(2) {
-		t.Error("uid 1 owns uid 2")
+	if acc.Owns(2) {
+		t.Error("uid 1 Owns uid 2")
 	}
 }
 

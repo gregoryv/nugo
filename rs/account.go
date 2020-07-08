@@ -67,7 +67,7 @@ func (me *Account) Use(sys *System) *Syscall {
 	}
 }
 
-func (me *Account) owns(id int) bool { return me.uid == id }
+func (me *Account) Owns(id int) bool { return me.uid == id }
 
 // permitted returns error if account does not have operation
 // permission to the given seal.

@@ -7,6 +7,16 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestSyscall_SetMode(t *testing.T) {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	asAnonymous := Anonymous.Use(sys)
+	ok, bad := asserter.NewErrors(t)
+	ok(asRoot.SetMode("/tmp", 0))
+	bad(asRoot.SetMode("/nosuch", 0))
+	bad(asAnonymous.SetMode("/tmp", 0))
+}
+
 // test struct
 type Alien struct {
 	Name string
