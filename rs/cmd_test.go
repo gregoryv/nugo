@@ -9,6 +9,22 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestMkacc(t *testing.T) {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	asAnonymous := Anonymous.Use(sys)
+	ok, bad := asserter.NewErrors(t)
+	ok(asRoot.ExecS("/bin/mkacc -h"))
+	ok(asRoot.ExecS("/bin/mkacc -uid 2 -gid 2 john"))
+	bad(asRoot.ExecS("/bin/mkacc -uid 2 -gid 2 john")).Log("same uid")
+	bad(asRoot.ExecS("/bin/mkacc -uid 3 -gid 3 john")).Log("same name")
+	bad(asRoot.ExecS("/bin/mkacc -uid k -gid 3 john")).Log("uid not int")
+	bad(asRoot.ExecS("/bin/mkacc")).Log("bad name")
+	bad(asRoot.ExecS("/bin/mkacc -uid 1 john")).Log("bad uid")
+	bad(asRoot.ExecS("/bin/mkacc -uid 3 -gid 1 john")).Log("bad gid")
+	bad(asAnonymous.ExecS("/bin/mkacc -uid 4 -git 4 eva")).Log("unauthorized")
+}
+
 func TestBin_Chmod(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
@@ -21,7 +37,7 @@ func TestBin_Chmod(t *testing.T) {
 	bad(asRoot.Exec("/bin/chmod", "-m", "010000", "/tmp"))
 }
 
-func ExampleBin_Chmod() {
+func ExampleChmod() {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
 	asRoot.Exec("/bin/chmod", "-m", "0", "/tmp")

@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"strings"
 
 	"github.com/gregoryv/fox"
 	"github.com/gregoryv/nugo"
 )
 
 type Syscall struct {
-	*System
+	*System // todo should probably hide this
 	acc     *Account
 	auditer fox.Logger // used to audit who executes what
 }
@@ -165,6 +166,13 @@ func (me *Syscall) Fexec(w io.Writer, abspath string, args ...string) error {
 	return me.ExecCmd(cmd)
 }
 
+// ExecS splits the cli on whitespace and executes the first as
+// absolute path and the rest as arguments
+func (me *Syscall) ExecS(cli string) error {
+	parts := strings.Split(cli, " ")
+	return me.Exec(parts[0], parts[1:]...)
+}
+
 // ExecCmd executes the given command. Fails if e.g. resource is not
 // Executable. All exec calls are audited if system has an auditer
 // configured.
@@ -194,6 +202,21 @@ func (me *Syscall) ExecCmd(cmd *Cmd) error {
 }
 
 type Mode nugo.NodeMode
+
+// AddAccount adds a new account to the system. Name and uid must be
+// unique.
+func (me *Syscall) AddAccount(acc *Account) error {
+	for _, existing := range me.System.accounts {
+		if existing.uid == acc.uid {
+			return fmt.Errorf("uid exists")
+		}
+		if existing.name == acc.name {
+			return fmt.Errorf("name exists")
+		}
+	}
+	me.System.accounts = append(me.System.accounts, acc)
+	return nil
+}
 
 // Mkdir creates the absolute path whith a given mode where the parent
 // must exist.
