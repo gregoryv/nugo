@@ -6,10 +6,15 @@ import (
 )
 
 func BenchmarkSyscall_Mkdir(b *testing.B) {
-	var (
-		sys = &Syscall{System: NewSystem(), acc: Root}
-	)
+	asRoot := Root.Use(NewSystem())
 	for i := 0; i < b.N; i++ {
-		sys.Mkdir(fmt.Sprintf("/dir%d", i), 0)
+		asRoot.Mkdir(fmt.Sprintf("/dir%d", i), 0)
+	}
+}
+
+func Benchmark_Stat(b *testing.B) {
+	asRoot := Root.Use(NewSystem())
+	for i := 0; i < b.N; i++ {
+		asRoot.Stat("/etc/accounts.gob")
 	}
 }
