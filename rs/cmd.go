@@ -33,14 +33,18 @@ func (me *Cmd) String() string {
 
 // ----------------------------------------
 
-type Bin struct{}
+type ExecFunc func(*Cmd) ExecErr
 
-type ExecFunc func(*Cmd) error
+func (me ExecFunc) Exec(cmd *Cmd) ExecErr { return me(cmd) }
 
-func (me ExecFunc) ExecCmd(cmd *Cmd) error { return me(cmd) }
+type ExecErr error
+
+type Executable interface {
+	Exec(*Cmd) ExecErr
+}
 
 // Chmod
-func (me *Bin) Chmod(cmd *Cmd) error {
+func Chmod(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("chmod", flag.ContinueOnError)
 	mode := flags.Uint("m", 0, "mode")
 	flags.SetOutput(cmd.Out)
@@ -55,7 +59,7 @@ func (me *Bin) Chmod(cmd *Cmd) error {
 }
 
 // Mkdir creates directories
-func (me *Bin) Mkdir(cmd *Cmd) error {
+func Mkdir(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
 	flags.SetOutput(cmd.Out)
 	mode := flags.Uint("m", 00755, "mode for new directory")
@@ -68,7 +72,7 @@ func (me *Bin) Mkdir(cmd *Cmd) error {
 }
 
 // Ls lists resources
-func (me *Bin) Ls(cmd *Cmd) error {
+func Ls(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("ls", flag.ContinueOnError)
 	recursive := flags.Bool("R", false, "recursive")
 	flags.SetOutput(cmd.Out)

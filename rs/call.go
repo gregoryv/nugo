@@ -177,7 +177,7 @@ func (me *Syscall) ExecCmd(cmd *Cmd) error {
 	case Executable:
 		// If needed setuid can be checked and enforced here
 		cmd.Sys = me
-		err = src.ExecCmd(cmd)
+		err = src.Exec(cmd)
 		if me.auditer != nil {
 			msg := fmt.Sprintf("%v %s", me.acc.uid, cmd.String())
 			if err != nil {
@@ -191,10 +191,6 @@ func (me *Syscall) ExecCmd(cmd *Cmd) error {
 	default:
 		return fmt.Errorf("Cannot run %T", src)
 	}
-}
-
-type Executable interface {
-	ExecCmd(*Cmd) error
 }
 
 type Mode nugo.NodeMode
