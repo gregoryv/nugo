@@ -34,7 +34,7 @@ func TestSyscall_RemoveAll(t *testing.T) {
 	)
 	ok(asRoot.RemoveAll("/tmp/alien"))
 	bad(asRoot.RemoveAll("/tmp/nosuch"))
-	bad(asAnonymous.RemoveAll("/etc/accounts"))
+	bad(asAnonymous.RemoveAll("/etc/accounts.gob"))
 }
 
 func TestSyscall_Load(t *testing.T) {
@@ -142,10 +142,10 @@ func TestSyscall_ExecCmd(t *testing.T) {
 
 func ExampleSyscall_Stat() {
 	sys := Anonymous.Use(NewSystem())
-	_, err := sys.Stat("/etc/accounts")
+	_, err := sys.Stat("/etc/accounts.gob")
 	fmt.Println(err)
 	// output:
-	// Stat /etc/accounts uid:0: d---rwxr-xr-x 1 1 exec denied
+	// Stat /etc/accounts.gob uid:0: d---rwxr-xr-x 1 1 exec denied
 }
 
 func TestSystem_Stat(t *testing.T) {

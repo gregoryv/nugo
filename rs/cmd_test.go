@@ -40,10 +40,10 @@ func TestBin_Ls(t *testing.T) {
 	bad(asRoot.Exec("/bin/ls", "/nosuch"))
 	// ls directory is covered by Examples
 	// ls file
-	asRoot.Fexec(&buf, "/bin/ls", "/etc/accounts/root.acc")
-	if buf.String() != "----rw-r--r-- 1 1 root.acc\n" {
-		t.Error(buf.String())
-	}
+	asRoot.Fexec(&buf, "/bin/ls", "/etc/accounts.gob")
+	exp := "----rw-r--r-- 1 1 accounts.gob\n"
+	assert := asserter.New(t)
+	assert().Equals(buf.String(), exp)
 
 	// only list accessible
 	buf.Reset()

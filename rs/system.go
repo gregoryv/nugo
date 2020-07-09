@@ -24,7 +24,8 @@ import (
 // unix filesystem.
 func NewSystem() *System {
 	sys := &System{
-		mounts: make(map[string]*nugo.RootNode),
+		mounts:   make(map[string]*nugo.RootNode),
+		accounts: []*Account{Anonymous, Root},
 	}
 	asRoot := Root.Use(sys)
 	asRoot.mount("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
@@ -38,18 +39,18 @@ func installSys(sys *System) {
 	asRoot := Root.Use(sys)
 	asRoot.Mkdir("/bin", 01755)
 	asRoot.Mkdir("/etc", 00755)
-	asRoot.Mkdir("/etc/accounts", 00755)
 	asRoot.Mkdir("/tmp", 07777)
 	asRoot.Install("/bin/chmod", ExecFunc(Chmod), 00755)
 	asRoot.Install("/bin/mkdir", ExecFunc(Mkdir), 00755)
 	asRoot.Install("/bin/ls", ExecFunc(Ls), 01755)
-	asRoot.Save("/etc/accounts/anonymous.acc", Anonymous)
-	asRoot.Save("/etc/accounts/root.acc", Root)
+
+	asRoot.Save("/etc/accounts.gob", sys.accounts)
 }
 
 type System struct {
-	mounts  map[string]*nugo.RootNode
-	auditer fox.Logger // Used audit Syscall.Exec calls
+	mounts   map[string]*nugo.RootNode
+	accounts []*Account
+	auditer  fox.Logger // Used audit Syscall.Exec calls
 }
 
 // SetAuditer sets the auditer for Syscall.Exec calls
