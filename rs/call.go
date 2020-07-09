@@ -153,11 +153,6 @@ func (me *Syscall) Install(abspath string, cmd Executable, mode nugo.NodeMode,
 	return &ResInfo{node: n}, nil
 }
 
-// Exec creates and executes a new command with system defaults.
-func (me *Syscall) Exec(abspath string, args ...string) error {
-	return me.ExecCmd(NewCmd(abspath, args...))
-}
-
 // Fexec creates and executes a new command and directs the output to
 // the given writer.
 func (me *Syscall) Fexec(w io.Writer, abspath string, args ...string) error {
@@ -166,11 +161,11 @@ func (me *Syscall) Fexec(w io.Writer, abspath string, args ...string) error {
 	return me.ExecCmd(cmd)
 }
 
-// ExecS splits the cli on whitespace and executes the first as
+// Exec splits the cli on whitespace and executes the first as
 // absolute path and the rest as arguments
-func (me *Syscall) ExecS(cli string) error {
+func (me *Syscall) Exec(cli string) error {
 	parts := strings.Split(cli, " ")
-	return me.Exec(parts[0], parts[1:]...)
+	return me.ExecCmd(NewCmd(parts[0], parts[1:]...))
 }
 
 // ExecCmd executes the given command. Fails if e.g. resource is not

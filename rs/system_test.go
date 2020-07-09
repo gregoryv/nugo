@@ -19,9 +19,9 @@ func TestSystem_SetAuditer(t *testing.T) {
 		asJohn  = NewAccount("john", 2).Use(sys)
 		ok, bad = asserter.NewErrors(t)
 	)
-	bad(asJohn.Exec("/bin/mkdir", "/etc/s"))
-	ok(asJohn.Exec("/bin/mkdir", "/tmp/s"))
-	ok(asRoot.Exec("/bin/mkdir", "/etc/x"))
+	bad(asJohn.Exec("/bin/mkdir /etc/s"))
+	ok(asJohn.Exec("/bin/mkdir /tmp/s"))
+	ok(asRoot.Exec("/bin/mkdir /etc/x"))
 	if buf.String() == "" {
 		t.Error("expected audit")
 	}
@@ -51,7 +51,7 @@ func TestSystem_mount(t *testing.T) {
 
 func Example_saveAndLoadResource() {
 	asRoot := Root.Use(NewSystem())
-	asRoot.Exec("/bin/mkdir", "/tmp/aliens")
+	asRoot.Exec("/bin/mkdir /tmp/aliens")
 	asRoot.Save("/tmp/aliens/green.gob", &Alien{Name: "Mr Green"})
 	var alien Alien
 	asRoot.Load(&alien, "/tmp/aliens/green.gob")
