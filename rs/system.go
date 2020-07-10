@@ -24,7 +24,7 @@ import (
 // unix filesystem.
 func NewSystem() *System {
 	sys := &System{
-		mounts:   make(map[string]*nugo.RootNode),
+		mounts:   make(map[string]*nugo.Node),
 		accounts: []*Account{Anonymous, Root},
 	}
 	asRoot := Root.Use(sys)
@@ -48,7 +48,7 @@ func installSys(sys *System) {
 }
 
 type System struct {
-	mounts   map[string]*nugo.RootNode
+	mounts   map[string]*nugo.Node
 	accounts []*Account
 	auditer  fox.Logger // Used audit Syscall.Exec calls
 }
@@ -59,7 +59,7 @@ func (me *System) SetAuditer(auditer fox.Logger) *System {
 	return me
 }
 
-func (me *System) mount(rn *nugo.RootNode) error {
+func (me *System) mount(rn *nugo.Node) error {
 	abspath := path.Clean(rn.Name())
 	if _, found := me.mounts[abspath]; found {
 		return fmt.Errorf("mount: %s already exists", abspath)
@@ -70,7 +70,7 @@ func (me *System) mount(rn *nugo.RootNode) error {
 
 // rootNode returns the mounting point of the abspath. Currently only
 // "/" is available.
-func (me *System) rootNode(abspath string) *nugo.RootNode {
+func (me *System) rootNode(abspath string) *nugo.Node {
 	rn := me.mounts["/"]
 	for p, n := range me.mounts {
 		if strings.Index(abspath, p) == 0 {

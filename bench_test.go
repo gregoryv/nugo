@@ -5,12 +5,12 @@ import (
 )
 
 var (
-	rn    *RootNode
+	rn    *Node
 	nodes int
 )
 
 func init() {
-	rn = NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	rn = NewRootNode("/", ModeSort|ModeDistinct)
 	for _, name := range "abcdefghihklmn" {
 		nodes++
 		c := NewNode(string(name))

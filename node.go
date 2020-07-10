@@ -317,25 +317,22 @@ func (me *Node) String() string {
 
 // ----------------------------------------
 
-// NewRoot returns a rootNode with ModeDir set.
-func NewRoot(abspath string) *RootNode {
-	return NewRootNode(abspath, ModeDir)
-}
-
-// NewRootNode returns a new node with the name as is. It's the
+// NewRoot returns a new node with the name as is. It's the
 // callers responsibility to make sure every basename is safe,
-// Valid abspaths are "/" or "/mnt/usb"
-func NewRootNode(abspath string, mode NodeMode) *RootNode {
-	return &RootNode{
-		Node: &Node{
-			mode: mode | ModeRoot,
-			name: path.Clean(abspath),
-		},
+// Valid abspaths are "/" or "/mnt/usb".
+// Defaults to mode ModeDir | ModeRoot.
+func NewRoot(abspath string) *Node {
+	return &Node{
+		mode: ModeDir | ModeRoot,
+		name: path.Clean(abspath),
 	}
 }
 
-type RootNode struct {
-	*Node
+// NewRootNode returns a root node with the additional given mode.
+func NewRootNode(abspath string, mode NodeMode) *Node {
+	n := NewRoot(abspath)
+	n.mode = n.mode | mode
+	return n
 }
 
 // Find returns the node matching the absolute path. This node must be

@@ -11,7 +11,7 @@ import (
 )
 
 func ExampleNodePrinter() {
-	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	root := NewRootNode("/", ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
 	root.Make("etc") // inherits parent mode
 	root.Walk(NodePrinter(os.Stdout))
@@ -21,7 +21,7 @@ func ExampleNodePrinter() {
 }
 
 func ExampleNodeLogger() {
-	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	root := NewRootNode("/", ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
 	tmp := root.Make("tmp")
 	tmp.Make("sub")
@@ -44,7 +44,7 @@ func TestWalker_Walk_recursive(t *testing.T) {
 	visitor := func(p, c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(&buf, abspath)
 	}
-	walker.Walk(nil, root.Node, "", visitor)
+	walker.Walk(nil, root, "", visitor)
 	if strings.Contains(buf.String(), "sub") {
 		t.Error("contains sub:", buf.String())
 	}
@@ -63,7 +63,7 @@ func TestWalker_Skip(t *testing.T) {
 			w.Skip()
 		}
 	}
-	walker.Walk(nil, root.Node, "", visitor)
+	walker.Walk(nil, root, "", visitor)
 	if strings.Contains(buf.String(), "sub") {
 		t.Error("contains sub:", buf.String())
 	}

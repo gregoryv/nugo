@@ -40,10 +40,10 @@ loop:
 	f.Close()
 }
 
-func largeTree() (int, *nugo.RootNode) {
-	rn := nugo.NewRootNode("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
+func largeTree() (int, *nugo.Node) {
+	rn := nugo.NewRootNode("/", nugo.ModeSort|nugo.ModeDistinct)
 	var count int
-	addRec(rn.Node, 10, 4, &count)
+	addRec(rn, 10, 4, &count)
 	return count, rn
 }
 
