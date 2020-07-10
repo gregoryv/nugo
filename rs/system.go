@@ -25,7 +25,7 @@ import (
 func NewSystem() *System {
 	sys := &System{
 		mounts:   make(map[string]*nugo.Node),
-		accounts: []*Account{Anonymous, Root},
+		accounts: []*Account{},
 	}
 	asRoot := Root.Use(sys)
 	asRoot.mount("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
@@ -39,12 +39,15 @@ func installSys(sys *System) {
 	asRoot := Root.Use(sys)
 	asRoot.Mkdir("/bin", 01755)
 	asRoot.Mkdir("/etc", 00755)
+	asRoot.Mkdir("/etc/accounts", 00755)
 	asRoot.Mkdir("/tmp", 07777)
 	asRoot.Install("/bin/chmod", ExecFunc(Chmod), 00755)
 	asRoot.Install("/bin/mkdir", ExecFunc(Mkdir), 00755)
 	asRoot.Install("/bin/ls", ExecFunc(Ls), 01755)
 	asRoot.Install("/bin/mkacc", ExecFunc(Mkacc), 00755)
-	asRoot.Save("/etc/accounts.gob", sys.accounts)
+
+	asRoot.AddAccount(Anonymous)
+	asRoot.AddAccount(Root)
 }
 
 type System struct {

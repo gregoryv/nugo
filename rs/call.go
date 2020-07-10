@@ -206,6 +206,8 @@ func (me *Syscall) AddAccount(acc *Account) error {
 		}
 	}
 	me.System.accounts = append(me.System.accounts, acc)
+	abspath := fmt.Sprintf("/etc/accounts/%s.acc", acc.name)
+	me.Save(abspath, 00755)
 	return nil
 }
 
