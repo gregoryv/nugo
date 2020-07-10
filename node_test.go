@@ -8,6 +8,15 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+func TestNode_AbsPath(t *testing.T) {
+	rn := NewRootNode("/", ModeDir)
+	a := rn.Make("a")
+	b := a.Make("b")
+	assert := asserter.New(t)
+	assert().Equals(a.AbsPath(), "/a")
+	assert().Equals(b.AbsPath(), "/a/b")
+}
+
 func TestNode_Copy(t *testing.T) {
 	n := &Node{src: 1}
 	c := n.Copy()
@@ -29,6 +38,12 @@ func TestNode_IsDir(t *testing.T) {
 	assert := asserter.New(t)
 	assert(!file.IsDir())
 	assert(dir.IsDir())
+}
+
+func TestRootNode_Parent(t *testing.T) {
+	rn := NewRootNode("/", ModeDir)
+	assert := asserter.New(t)
+	assert(rn.Parent() == nil).Error("expect no child")
 }
 
 func TestRootNode_Child(t *testing.T) {

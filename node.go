@@ -87,8 +87,9 @@ func NewNode(name string) *Node {
 // node names and links a sibling and a child.
 type Node struct {
 	name    string
-	sibling *Node
+	parent  *Node
 	child   *Node
+	sibling *Node
 
 	uid  int
 	gid  int
@@ -96,6 +97,14 @@ type Node struct {
 
 	sync.RWMutex
 	src interface{}
+}
+
+// AbsPath returns the absolute path to this node.
+func (me *Node) AbsPath() string {
+	if me.parent == nil {
+		return me.name
+	}
+	return path.Join(me.parent.AbsPath(), me.name)
 }
 
 // Name returns the base name of a node
@@ -165,6 +174,7 @@ func (me *Node) Add(children ...*Node) {
 	defer mu.Unlock()
 	for _, n := range children {
 		n.mode = me.mode
+		n.parent = me
 		if n.mode&ModeDistinct == ModeDistinct {
 			me.delChild(n.Name())
 		}
@@ -232,6 +242,9 @@ func (me *Node) LastChild() *Node {
 	}
 	return last
 }
+
+// Parent returns parent of this nodo.
+func (my *Node) Parent() *Node { return my.parent }
 
 // Child returns child of this node.
 func (my *Node) Child() *Node { return my.child }
