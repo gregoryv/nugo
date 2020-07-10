@@ -3,45 +3,9 @@ package rs
 import (
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"strings"
 
 	"github.com/gregoryv/nugo"
 )
-
-// NewCmd returns a new command.
-func NewCmd(abspath string, args ...string) *Cmd {
-	return &Cmd{
-		Abspath: abspath, Args: args, Out: ioutil.Discard}
-}
-
-type Cmd struct {
-	Abspath string // of the command
-	Args    []string
-
-	// Access to system with a specific account
-	Sys *Syscall
-
-	Out io.Writer
-}
-
-// String returns the command with its arguments
-func (me *Cmd) String() string {
-	return fmt.Sprintf("%s %s", me.Abspath, strings.Join(me.Args, " "))
-}
-
-// ----------------------------------------
-
-type ExecFunc func(*Cmd) ExecErr
-
-func (me ExecFunc) Exec(cmd *Cmd) ExecErr { return me(cmd) }
-
-type ExecErr error
-
-type Executable interface {
-	Exec(*Cmd) ExecErr
-}
 
 // Mkacc
 func Mkacc(cmd *Cmd) ExecErr {
