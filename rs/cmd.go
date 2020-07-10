@@ -7,7 +7,7 @@ import (
 	"github.com/gregoryv/nugo"
 )
 
-// Mkacc
+// Mkacc creates an account.
 func Mkacc(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("mkacc", flag.ContinueOnError)
 	uid := flags.Int("uid", -1, "uid of the new account")

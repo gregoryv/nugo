@@ -9,6 +9,11 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
+var (
+	sys    = NewSystem()
+	asRoot = Root.Use(sys)
+)
+
 func TestMkacc(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
@@ -23,6 +28,16 @@ func TestMkacc(t *testing.T) {
 	bad(asRoot.Exec("/bin/mkacc -uid 1 john")).Log("bad uid")
 	bad(asRoot.Exec("/bin/mkacc -uid 3 -gid 1 john")).Log("bad gid")
 	bad(asAnonymous.Exec("/bin/mkacc -uid 4 -git 4 eva")).Log("unauthorized")
+}
+
+func ExampleMkacc_help() {
+	asRoot.Fexec(os.Stdout, "/bin/mkacc", "-h")
+	// output:
+	// Usage of mkacc:
+	//   -gid int
+	//     	gid of the new account (default -1)
+	//   -uid int
+	//     	uid of the new account (default -1)
 }
 
 func TestChmod(t *testing.T) {
