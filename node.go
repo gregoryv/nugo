@@ -1,5 +1,4 @@
 /*
-
 Package nugo provides a graph with unix style modes.
 
 The graph is a set of linked nodes
@@ -14,6 +13,7 @@ The graph is a set of linked nodes
                  sibling
                  ...
 
+Each node references its parent aswell.
 In addition to the standard unix permission rwxrwxrwx another set of
 rwx are added to indicate anonymous access control. Permission bits
 for "Other" means other authenticated.
@@ -26,6 +26,9 @@ for "Other" means other authenticated.
       Group --------+  |
       Other -----------+
 
+Operations on the graph are not synchronized, this is left to any
+system using it.
+
 */
 package nugo
 
@@ -35,9 +38,6 @@ import (
 	"path"
 	"sync"
 )
-
-// Mutex for synchronizing all write and delete operations.
-var mu sync.Mutex
 
 // NewRootNode returns a root node with the additional given mode.
 func NewRootNode(abspath string, mode NodeMode) *Node {
@@ -158,8 +158,6 @@ func (me *Node) MakeAll(names ...string) []*Node {
 // parent node. Add blocks if another add is in progress.
 // For ModeDistinct an existing node with the same name is replaced.
 func (me *Node) Add(children ...*Node) {
-	mu.Lock()
-	defer mu.Unlock()
 	for _, n := range children {
 		// inherit
 		n.uid = me.uid
@@ -255,9 +253,7 @@ func (me *Node) Copy() *Node {
 // DelChild removes the first child with the given name and returns the
 // removed node
 func (me *Node) DelChild(name string) *Node {
-	mu.Lock()
 	n := me.delChild(name)
-	mu.Unlock()
 	return n
 }
 
