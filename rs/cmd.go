@@ -7,21 +7,6 @@ import (
 	"github.com/gregoryv/nugo"
 )
 
-// Chmod
-func Chmod(cmd *Cmd) ExecErr {
-	flags := flag.NewFlagSet("chmod", flag.ContinueOnError)
-	mode := flags.Uint("m", 0, "mode")
-	flags.SetOutput(cmd.Out)
-	if err := flags.Parse(cmd.Args); err != nil {
-		return err
-	}
-	abspath := flags.Arg(0)
-	if abspath == "" {
-		return fmt.Errorf("missing abspath")
-	}
-	return cmd.Sys.SetMode(abspath, Mode(*mode))
-}
-
 // Mkdir creates directories
 func Mkdir(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("mkdir", flag.ContinueOnError)
