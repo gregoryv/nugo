@@ -33,50 +33,28 @@ import (
 	"fmt"
 	"net/url"
 	"path"
-	"strings"
 	"sync"
 )
 
 // Mutex for synchronizing all write and delete operations.
 var mu sync.Mutex
 
-// A NodeMode represents a node's mode and permission bits.
-type NodeMode uint32
-
-const (
-	ModeDir      NodeMode = 1 << (32 - 1 - iota)
-	ModeSort              // sorted by name
-	ModeDistinct          // no duplicate children
-	ModeRoot
-
-	ModeType NodeMode = ModeSort | ModeDistinct
-	ModePerm NodeMode = 07777
-)
-
-// String returns the bits as string using rwx notation for each bit.
-func (m NodeMode) String() string {
-	var s strings.Builder
-	s.WriteByte(mChar(m, ModeDir, 'd'))
-	s.WriteByte(mChar(m, 04000, 'r'))
-	s.WriteByte(mChar(m, 02000, 'w'))
-	s.WriteByte(mChar(m, 01000, 'x'))
-	s.WriteByte(mChar(m, 00400, 'r'))
-	s.WriteByte(mChar(m, 00200, 'w'))
-	s.WriteByte(mChar(m, 00100, 'x'))
-	s.WriteByte(mChar(m, 00040, 'r'))
-	s.WriteByte(mChar(m, 00020, 'w'))
-	s.WriteByte(mChar(m, 00010, 'x'))
-	s.WriteByte(mChar(m, 00004, 'r'))
-	s.WriteByte(mChar(m, 00002, 'w'))
-	s.WriteByte(mChar(m, 00001, 'x'))
-	return s.String()
+// NewRootNode returns a root node with the additional given mode.
+func NewRootNode(abspath string, mode NodeMode) *Node {
+	n := NewRoot(abspath)
+	n.mode = n.mode | mode
+	return n
 }
 
-func mChar(m, mask NodeMode, c byte) byte {
-	if m&mask == mask {
-		return c
+// NewRoot returns a new node with the name as is. It's the
+// callers responsibility to make sure every basename is safe,
+// Valid abspaths are "/" or "/mnt/usb".
+// Defaults to mode ModeDir | ModeRoot.
+func NewRoot(abspath string) *Node {
+	return &Node{
+		mode: ModeDir | ModeRoot,
+		name: path.Clean(abspath),
 	}
-	return '-'
 }
 
 // NewNode returns a new node with the given name url path escaped.
@@ -313,26 +291,6 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 // String todo
 func (me *Node) String() string {
 	return fmt.Sprintf("%s %s", me.Seal(), me.name)
-}
-
-// ----------------------------------------
-
-// NewRoot returns a new node with the name as is. It's the
-// callers responsibility to make sure every basename is safe,
-// Valid abspaths are "/" or "/mnt/usb".
-// Defaults to mode ModeDir | ModeRoot.
-func NewRoot(abspath string) *Node {
-	return &Node{
-		mode: ModeDir | ModeRoot,
-		name: path.Clean(abspath),
-	}
-}
-
-// NewRootNode returns a root node with the additional given mode.
-func NewRootNode(abspath string, mode NodeMode) *Node {
-	n := NewRoot(abspath)
-	n.mode = n.mode | mode
-	return n
 }
 
 // Find returns the node matching the absolute path. This node must be
