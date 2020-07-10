@@ -42,7 +42,7 @@ func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 	// less allocation over child.AbsPath()
 	childAbspath := path.Join(abspath, child.Name())
 	fn(parent, child, childAbspath, me)
-	if (parent == nil || me.recursive) && !me.skip {
+	if (child.isRoot() || me.recursive) && !me.skip {
 		me.Walk(child, child.child, childAbspath, fn)
 	}
 	me.Walk(parent, child.sibling, abspath, fn)

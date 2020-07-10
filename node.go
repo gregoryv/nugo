@@ -36,6 +36,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strings"
 	"sync"
 )
 
@@ -301,6 +302,9 @@ func (me *Node) Find(abspath string) (*Node, error) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
+		}
+		if !strings.HasPrefix(fullname, abspath) {
+			w.Skip() // don't descend into this child
 		}
 	})
 	if n == nil {
