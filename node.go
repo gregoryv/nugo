@@ -47,6 +47,7 @@ const (
 	ModeDir      NodeMode = 1 << (32 - 1 - iota)
 	ModeSort              // sorted by name
 	ModeDistinct          // no duplicate children
+	ModeRoot
 
 	ModeType NodeMode = ModeSort | ModeDistinct
 	ModePerm NodeMode = 07777
@@ -343,6 +344,6 @@ func (me *RootNode) Find(abspath string) (*Node, error) {
 }
 
 // Walk over each node until Walker is stopped.
-func (me *RootNode) Walk(fn Visitor) {
-	NewWalker().Walk(nil, me.Node, "", fn)
+func (me *Node) Walk(fn Visitor) {
+	NewWalker().Walk(me.Parent(), me, "", fn)
 }
