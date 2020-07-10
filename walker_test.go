@@ -23,8 +23,7 @@ func ExampleNodePrinter() {
 func ExampleNodeLogger() {
 	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)
-	root.Make("tmp")
-	tmp := root.Find("/tmp")
+	tmp := root.Make("tmp")
 	tmp.Make("sub")
 	l := fox.NewSyncLog(os.Stdout)
 	root.Walk(NodeLogger(l))

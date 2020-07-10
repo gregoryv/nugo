@@ -327,7 +327,7 @@ type RootNode struct {
 
 // Find returns the node matching the absolute path starting at the
 // root.
-func (me *RootNode) Find(abspath string) *Node {
+func (me *RootNode) Find(abspath string) (*Node, error) {
 	fullname := path.Clean(abspath)
 	var n *Node
 	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
@@ -336,7 +336,10 @@ func (me *RootNode) Find(abspath string) *Node {
 			w.Stop()
 		}
 	})
-	return n
+	if n == nil {
+		return nil, fmt.Errorf("%s no such directory or resource", abspath)
+	}
+	return n, nil
 }
 
 // Locate returns a new root node with each child set to the one
