@@ -316,7 +316,7 @@ func NewRoot(abspath string) *RootNode {
 func NewRootNode(abspath string, mode NodeMode) *RootNode {
 	return &RootNode{
 		Node: &Node{
-			mode: mode,
+			mode: mode | ModeRoot,
 			name: path.Clean(abspath),
 		},
 	}
@@ -328,7 +328,7 @@ type RootNode struct {
 
 // Find returns the node matching the absolute path starting at the
 // root.
-func (me *RootNode) Find(abspath string) (*Node, error) {
+func (me *Node) Find(abspath string) (*Node, error) {
 	fullname := path.Clean(abspath)
 	var n *Node
 	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
