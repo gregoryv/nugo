@@ -20,8 +20,7 @@ func TestChmod(t *testing.T) {
 }
 
 func ExampleChmod() {
-	sys := NewSystem()
-	asRoot := Root.Use(sys)
+	asRoot := Root.Use(NewSystem())
 	asRoot.Fexec(os.Stdout, "/bin/ls", "/tmp") // before
 	asRoot.Exec("/bin/chmod -m 01755 /tmp")
 	asRoot.Fexec(os.Stdout, "/bin/ls", "/tmp") // after
@@ -31,6 +30,7 @@ func ExampleChmod() {
 }
 
 func ExampleChmod_help() {
+	asRoot := Root.Use(NewSystem())
 	asRoot.Fexec(os.Stdout, "/bin/chmod", "-h")
 	// output:
 	// Usage of chmod:

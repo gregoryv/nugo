@@ -9,11 +9,6 @@ import (
 	"github.com/gregoryv/asserter"
 )
 
-var (
-	sys    = NewSystem()
-	asRoot = Root.Use(sys)
-)
-
 func TestLs(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
@@ -46,4 +41,12 @@ func ExampleLs() {
 	// d--xrwxr-xr-x 1 1 bin
 	// d---rwxr-xr-x 1 1 etc
 	// drwxrwxrwxrwx 1 1 tmp
+}
+
+func ExampleLs_help() {
+	asRoot := Root.Use(NewSystem())
+	asRoot.Fexec(os.Stdout, "/bin/ls", "-h")
+	// output:
+	// Usage of ls:
+	//   -R	recursive
 }
