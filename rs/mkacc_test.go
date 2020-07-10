@@ -13,7 +13,7 @@ func TestMkacc(t *testing.T) {
 	asAnonymous := Anonymous.Use(sys)
 	ok, bad := asserter.NewErrors(t)
 	ok(asRoot.Exec("/bin/mkacc -h"))
-	ok(asRoot.Exec("/bin/mkacc -uid 2 -gid 2 john"))
+	ok(asRoot.Exec("/bin/mkacc john")) // automatically use uid,gid 2,2
 	bad(asRoot.Exec("/bin/mkacc -uid 2 -gid 2 john")).Log("same uid")
 	bad(asRoot.Exec("/bin/mkacc -uid 3 -gid 3 john")).Log("same name")
 	bad(asRoot.Exec("/bin/mkacc -uid k -gid 3 john")).Log("uid not int")
@@ -28,7 +28,7 @@ func ExampleMkacc_help() {
 	// output:
 	// Usage of mkacc:
 	//   -gid int
-	//     	gid of the new account (default -1)
+	//     	optional gid of the new account (default -1)
 	//   -uid int
-	//     	uid of the new account (default -1)
+	//     	optional uid of the new account (default -1)
 }

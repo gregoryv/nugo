@@ -53,7 +53,32 @@ func installSys(sys *System) {
 type System struct {
 	mounts   map[string]*nugo.Node
 	accounts []*Account
-	auditer  fox.Logger // Used audit Syscall.Exec calls
+
+	auditer fox.Logger // Used audit Syscall.Exec calls
+}
+
+// NextUID returns next available uid
+func (me *System) NextUID() int {
+	var uid int
+	for _, acc := range me.accounts {
+		if acc.uid > uid {
+			uid = acc.uid
+		}
+	}
+	return uid + 1
+}
+
+// NextGID returns next available gid
+func (me *System) NextGID() int {
+	var gid int
+	for _, acc := range me.accounts {
+		for _, id := range acc.groups {
+			if id > gid {
+				gid = id
+			}
+		}
+	}
+	return gid + 1
 }
 
 // SetAuditer sets the auditer for Syscall.Exec calls
