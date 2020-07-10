@@ -40,6 +40,12 @@ func TestNode_IsDir(t *testing.T) {
 	assert(dir.IsDir())
 }
 
+func TestNode_IsRoot(t *testing.T) {
+	ok, bad := asserter.NewErrors(t)
+	bad(NewNode("x").IsRoot()).Log("default")
+	ok(NewRootNode("/x", 017555).IsRoot())
+}
+
 func TestRootNode_Parent(t *testing.T) {
 	rn := NewRootNode("/", ModeDir)
 	assert := asserter.New(t)
@@ -79,9 +85,11 @@ func TestNode_SetSource(t *testing.T) {
 
 func TestRootNode_Find(t *testing.T) {
 	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
+	a := rn.Make("a")
 	ok, bad := asserter.NewMixed(t)
 	ok(rn.Find("/"))
 	bad(rn.Find("/nosuch"))
+	bad(a.Find("something")).Log("not root")
 }
 
 func Example_sortedDistinct() {

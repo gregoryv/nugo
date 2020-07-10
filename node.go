@@ -137,6 +137,16 @@ func (my *Node) SetSource(r interface{}) { my.src = r }
 // IsDir returns true if ModeDir is set
 func (me *Node) IsDir() bool { return me.mode&ModeDir != 0 }
 
+// IsRoot
+func (me *Node) IsRoot() error {
+	if !me.isRoot() {
+		return fmt.Errorf("%s not root", me.AbsPath())
+	}
+	return nil
+}
+
+func (me *Node) isRoot() bool { return me.mode&ModeRoot != 0 }
+
 // UnsetMode todo
 func (me *Node) UnsetMode(mask NodeMode) {
 	me.mode = me.mode &^ mask
@@ -153,7 +163,6 @@ func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
 // The new node as ModeDir set.
 func (me *Node) Make(name string) *Node {
 	n := NewNode(name)
-	n.SetSeal(me.uid, me.gid, me.mode) // inherit parent
 	me.Add(n)
 	return n
 }
@@ -174,7 +183,10 @@ func (me *Node) Add(children ...*Node) {
 	mu.Lock()
 	defer mu.Unlock()
 	for _, n := range children {
-		n.mode = me.mode
+		// inherit
+		n.uid = me.uid
+		n.gid = me.gid
+		n.mode = me.mode &^ ModeRoot
 		n.parent = me
 		if n.mode&ModeDistinct == ModeDistinct {
 			me.delChild(n.Name())
@@ -326,9 +338,12 @@ type RootNode struct {
 	*Node
 }
 
-// Find returns the node matching the absolute path starting at the
-// root.
+// Find returns the node matching the absolute path. This node must be
+// a root node.
 func (me *Node) Find(abspath string) (*Node, error) {
+	if err := me.IsRoot(); err != nil {
+		return nil, fmt.Errorf("Find: %w", err)
+	}
 	fullname := path.Clean(abspath)
 	var n *Node
 	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
@@ -345,5 +360,6 @@ func (me *Node) Find(abspath string) (*Node, error) {
 
 // Walk over each node until Walker is stopped.
 func (me *Node) Walk(fn Visitor) {
+	// todo adapt for walking from a child
 	NewWalker().Walk(me.Parent(), me, "", fn)
 }
