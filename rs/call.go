@@ -37,18 +37,11 @@ func (me *Syscall) SetMode(abspath string, mode Mode) error {
 
 // RemoveAll
 func (me *Syscall) RemoveAll(abspath string) error {
-	rn := me.rootNode(abspath)
-	nodes, err := rn.Locate(abspath)
+	n, err := me.stat(abspath)
 	if err != nil {
 		return wrap("RemoveAll", err)
 	}
-	for _, n := range nodes {
-		if err := me.acc.permitted(OpExec, n); err != nil {
-			return fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
-		}
-	}
-	last := len(nodes) - 1
-	nodes[last-1].DelChild(nodes[last].Name())
+	n.Parent().DelChild(n.Name())
 	return nil
 }
 
@@ -58,6 +51,9 @@ func (me *Syscall) Open(abspath string) (*Resource, error) {
 	n, err := me.stat(abspath)
 	if err != nil {
 		return nil, fmt.Errorf("Open: %s", err)
+	}
+	if err := me.acc.permitted(OpRead, n); err != nil {
+		return nil, wrap("Open", err)
 	}
 	r := newResource(n, OpRead)
 	r.unlock = n.RUnlock
@@ -243,16 +239,18 @@ func (me *Syscall) Stat(abspath string) (*ResInfo, error) {
 // it, ie. all nodes up to it must have execute mode set.
 func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 	rn := me.rootNode(abspath)
-	nodes, err := rn.Locate(abspath)
+	n, err := rn.Find(abspath)
 	if err != nil {
 		return nil, err
 	}
-	for _, n := range nodes {
-		if err := me.acc.permitted(OpExec, n); err != nil {
+	parent := n.Parent()
+	for parent != nil {
+		if err := me.acc.permitted(OpExec, parent); err != nil {
 			return nil, fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
 		}
+		parent = parent.Parent()
 	}
-	return nodes[len(nodes)-1], nil
+	return n, nil
 }
 
 func wrap(prefix string, err error) error {
@@ -270,13 +268,12 @@ func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
 }
 
 func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
-	w := nugo.NewWalker()
-	w.SetRecursive(recursive)
-	rn := me.rootNode(abspath)
-	nodes, err := rn.Locate(abspath)
+	n, err := me.stat(abspath)
 	if err != nil {
 		return err
 	}
+	w := nugo.NewWalker()
+	w.SetRecursive(recursive)
 	// wrap the visitor with access control
 	visitor := func(parent, child *nugo.Node, abspath string, w *nugo.Walker) {
 		n := parent
@@ -294,12 +291,7 @@ func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
 		c := &ResInfo{child}
 		fn(p, c, abspath, w)
 	}
-	child := nodes[len(nodes)-1]
-	var parent *nugo.Node
-	if len(nodes) > 1 {
-		parent = nodes[len(nodes)-2]
-	}
-	w.Walk(parent, child, path.Dir(abspath), visitor)
+	w.Walk(n.Parent(), n, path.Dir(abspath), visitor)
 	return nil
 }
 

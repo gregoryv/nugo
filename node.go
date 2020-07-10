@@ -342,33 +342,6 @@ func (me *RootNode) Find(abspath string) (*Node, error) {
 	return n, nil
 }
 
-// Locate returns a new root node with each child set to the one
-// matching the abspath.
-func (me *RootNode) Locate(abspath string) ([]*Node, error) {
-	fullname := path.Clean(abspath)
-	result := []*Node{me.Node}
-	if abspath == "/" {
-		return result, nil
-	}
-	var found bool
-	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
-		if parent == nil { // skip parent
-			return
-		}
-		if strings.Index(fullname, abspath) == 0 {
-			result = append(result, child)
-			if fullname == abspath {
-				found = true
-				w.Stop()
-			}
-		}
-	})
-	if !found {
-		return result, fmt.Errorf("Locate %s: not found", abspath)
-	}
-	return result, nil
-}
-
 // Walk over each node until Walker is stopped.
 func (me *RootNode) Walk(fn Visitor) {
 	NewWalker().Walk(nil, me.Node, "", fn)

@@ -84,15 +84,11 @@ func TestSyscall_Open(t *testing.T) {
 		_           = asRoot.Save("/tmp/alien.gob", &Alien{Name: "x"})
 		ok, bad     = asserter.NewMixed(t)
 	)
-	// owner has read permission on newly created resources
-	ok(asRoot.Open("/tmp/alien.gob"))
-	// missing resource
-	bad(asRoot.Open("/nosuch"))
-	// inadequate permission
-	bad(asAnonymous.Open("/tmp/alien.gob"))
-	// write to read only
+	ok(asRoot.Open("/tmp/alien.gob")).Log("owner created")
+	bad(asRoot.Open("/nosuch")).Log("missing resource")
+	bad(asAnonymous.Open("/tmp/alien.gob")).Log("inadequate permission")
 	res, _ := asRoot.Open("/tmp/alien.gob")
-	bad(res.Write([]byte("")))
+	bad(res.Write([]byte(""))).Log("write to readonly")
 }
 
 func TestSyscall_Create(t *testing.T) {
@@ -155,7 +151,7 @@ func TestSystem_Stat(t *testing.T) {
 	)
 	ok(Stat("/"))
 	ok(Stat("/bin"))
-	bad(Stat("/etc"))
+	bad(Stat("/etc/accounts.gob"))
 	bad(Stat("/nothing"))
 }
 

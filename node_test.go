@@ -84,49 +84,6 @@ func TestRootNode_Find(t *testing.T) {
 	bad(rn.Find("/nosuch"))
 }
 
-func TestRootNode_Locate_itself(t *testing.T) {
-	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	rn.SetSeal(1, 1, 01755)
-	rn.MakeAll("etc")
-	ok, bad := asserter.NewMixed(t)
-
-	ok(rn.Locate("/"))
-	bad(rn.Locate("/ljlj"))
-}
-
-func TestRootNode_Locate(t *testing.T) {
-	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	bin := rn.Make("bin")
-	rn.Make("etc")
-	bin.Make("mkdir")
-	_, bad := asserter.NewMixed(t)
-	//
-	b, err := rn.Locate("/bin/mkdir")
-	if err != nil {
-		t.Fatal(err)
-	}
-	got := b[len(b)-1].Name()
-	if got != "mkdir" {
-		rn.Walk(NodeLogger(t))
-		t.Fail()
-	}
-	// locate missing directory
-	bad(rn.Locate("/bin/nosuch"))
-}
-
-func ExampleRootNode_Locate() {
-	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
-	root.SetSeal(1, 1, 01755)
-	root.MakeAll("etc", "tmp")
-	nodes, _ := root.Locate("/etc")
-	for _, node := range nodes {
-		fmt.Println(node)
-	}
-	// output:
-	// d--xrwxr-xr-x 1 1 /
-	// d--xrwxr-xr-x 1 1 etc
-}
-
 func Example_sortedDistinct() {
 	root := NewRootNode("/", ModeSort|ModeDistinct)
 	b := root.Make("b")
