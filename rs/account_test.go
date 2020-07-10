@@ -27,7 +27,9 @@ func TestAccount_DelGroup(t *testing.T) {
 
 func TestAccount_Owns(t *testing.T) {
 	acc := NewAccount("root", 1)
-	if acc.Owns(2) {
+	n := nugo.NewNode("x")
+	n.SetUID(2)
+	if acc.Owns(n) {
 		t.Error("uid 1 Owns uid 2")
 	}
 }
@@ -37,12 +39,21 @@ func TestAccount_permittedAnonymous(t *testing.T) {
 		ok, bad = asserter.NewErrors(t)
 		perm    = Anonymous.permitted
 	)
-	ok(perm(OpRead, &nugo.Seal{1, 1, 07000}))
-	ok(perm(OpRead, &nugo.Seal{1, 1, 04000}))
-	ok(perm(OpWrite, &nugo.Seal{1, 1, 02000}))
-	ok(perm(OpExec, &nugo.Seal{1, 1, 01000}))
-	bad(perm(OpExec, &nugo.Seal{1, 1, 02000}))
-	bad(perm(OpExec, &nugo.Seal{1, 1, 00000}))
+
+	ok(perm(OpRead, sealed(1, 1, 07000)))
+	ok(perm(OpRead, sealed(1, 1, 04000)))
+	ok(perm(OpWrite, sealed(1, 1, 02000)))
+	ok(perm(OpExec, sealed(1, 1, 01000)))
+	bad(perm(OpExec, sealed(1, 1, 02000)))
+	bad(perm(OpExec, sealed(1, 1, 00000)))
+}
+
+func sealed(uid, gid int, perm nugo.NodeMode) *nugo.Node {
+	n := nugo.NewNode("x")
+	n.SetUID(uid)
+	n.SetGID(gid)
+	n.SetPerm(perm)
+	return n
 }
 
 func TestAccount_permittedRoot(t *testing.T) {
@@ -51,9 +62,9 @@ func TestAccount_permittedRoot(t *testing.T) {
 		perm  = Root.permitted
 	)
 	// root is special in that it always has full access
-	ok(perm(OpRead, &nugo.Seal{1, 1, 00000}))
-	ok(perm(OpWrite, &nugo.Seal{1, 2, 00000}))
-	ok(perm(OpExec, &nugo.Seal{0, 0, 00000}))
+	ok(perm(OpRead, sealed(1, 1, 00000)))
+	ok(perm(OpWrite, sealed(1, 2, 00000)))
+	ok(perm(OpExec, sealed(0, 0, 00000)))
 }
 
 func TestAccount_permittedOther(t *testing.T) {
@@ -62,7 +73,7 @@ func TestAccount_permittedOther(t *testing.T) {
 		perm  = NewAccount("john", 2).permitted
 	)
 	// root is special in that it always has full access
-	ok(perm(OpRead, &nugo.Seal{2, 2, 00400}))
-	ok(perm(OpRead, &nugo.Seal{3, 2, 00040}))
-	ok(perm(OpRead, &nugo.Seal{1, 1, 00004}))
+	ok(perm(OpRead, sealed(2, 2, 00400)))
+	ok(perm(OpRead, sealed(3, 2, 00040)))
+	ok(perm(OpRead, sealed(1, 1, 00004)))
 }

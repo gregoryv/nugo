@@ -105,8 +105,8 @@ func (my *Node) Name() string { return my.name }
 func (my *Node) Source() interface{} { return my.src }
 
 // Seal returns the access control seal of this node.
-func (my *Node) Seal() *Seal {
-	return &Seal{UID: my.uid, GID: my.gid, Mode: my.mode}
+func (my *Node) Seal() Seal {
+	return Seal{UID: my.uid, GID: my.gid, Mode: my.mode}
 }
 
 // SetUID sets the owner id of this node.

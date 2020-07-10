@@ -67,15 +67,19 @@ func (me *Account) Use(sys *System) *Syscall {
 	}
 }
 
-func (me *Account) Owns(id int) bool { return me.uid == id }
+// Owns returns tru if the account uid mathes the given id
+func (me *Account) Owns(s nugo.Sealed) bool {
+	return me.uid == s.Seal().UID
+}
 
 // permitted returns error if account does not have operation
 // permission to the given seal.
-func (my *Account) permitted(op operation, seal *nugo.Seal) error {
+func (my *Account) permitted(op operation, s nugo.Sealed) error {
 	if my.uid == Root.uid {
 		return nil
 	}
 	n, u, g, o := op.Modes()
+	seal := s.Seal()
 	switch {
 	case my.uid == 0 && (seal.Mode&n == n): // anonymous
 	case my.uid == seal.UID && (seal.Mode&u == u): // owner

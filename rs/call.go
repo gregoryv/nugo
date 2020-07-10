@@ -25,7 +25,7 @@ func (me *Syscall) SetMode(abspath string, mode Mode) error {
 	if err != nil {
 		return wrap("SetMode", err)
 	}
-	if !me.acc.Owns(n.Seal().UID) && me.acc != Root {
+	if !me.acc.Owns(n) && me.acc != Root {
 		return fmt.Errorf("SetMode: %v not owner of %s", me.acc.uid, abspath)
 	}
 	if nugo.NodeMode(mode) > nugo.ModePerm {
@@ -43,7 +43,7 @@ func (me *Syscall) RemoveAll(abspath string) error {
 		return wrap("RemoveAll", err)
 	}
 	for _, n := range nodes {
-		if err := me.acc.permitted(OpExec, n.Seal()); err != nil {
+		if err := me.acc.permitted(OpExec, n); err != nil {
 			return fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
 		}
 	}
@@ -86,7 +86,7 @@ func (me *Syscall) Create(abspath string) (*Resource, error) {
 	if err != nil {
 		return nil, wrap("Create", err)
 	}
-	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent.node); err != nil {
 		return nil, wrap("Create", err)
 	}
 	n := parent.node.Make(name)
@@ -143,7 +143,7 @@ func (me *Syscall) Install(abspath string, cmd Executable, mode nugo.NodeMode,
 	if err != nil {
 		return nil, wrap("Install", err)
 	}
-	if err := me.acc.permitted(OpWrite, parent.node.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent.node); err != nil {
 		return nil, wrap("Install", err)
 	}
 	n := parent.node.Make(name)
@@ -221,7 +221,7 @@ func (me *Syscall) Mkdir(abspath string, mode Mode) (*ResInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
-	if err := me.acc.permitted(OpWrite, parent.Seal()); err != nil {
+	if err := me.acc.permitted(OpWrite, parent); err != nil {
 		return nil, fmt.Errorf("Mkdir: %w", err)
 	}
 	n := parent.Make(name)
@@ -248,7 +248,7 @@ func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 		return nil, err
 	}
 	for _, n := range nodes {
-		if err := me.acc.permitted(OpExec, n.Seal()); err != nil {
+		if err := me.acc.permitted(OpExec, n); err != nil {
 			return nil, fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)
 		}
 	}
@@ -283,7 +283,7 @@ func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
 		if parent == nil {
 			n = child
 		}
-		if me.acc.permitted(OpExec, n.Seal()) != nil {
+		if me.acc.permitted(OpExec, n) != nil {
 			w.Skip()
 			return
 		}
