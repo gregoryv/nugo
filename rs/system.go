@@ -26,6 +26,7 @@ func NewSystem() *System {
 	sys := &System{
 		mounts:   make(map[string]*nugo.Node),
 		accounts: []*Account{},
+		groups:   []*Group{},
 	}
 	asRoot := Root.Use(sys)
 	asRoot.mount("/", nugo.ModeDir|nugo.ModeSort|nugo.ModeDistinct)
@@ -53,6 +54,7 @@ func installSys(sys *System) {
 type System struct {
 	mounts   map[string]*nugo.Node
 	accounts []*Account
+	groups   []*Group
 
 	auditer fox.Logger // Used audit Syscall.Exec calls
 }

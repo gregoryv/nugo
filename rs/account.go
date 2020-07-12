@@ -1,8 +1,10 @@
 package rs
 
 import (
+	"encoding/gob"
 	"errors"
 	"fmt"
+	"io"
 	"sync"
 
 	"github.com/gregoryv/nugo"
@@ -29,6 +31,35 @@ type Account struct {
 
 	mu     sync.Mutex
 	groups []int
+}
+
+type account struct {
+	Name   string
+	UID    int
+	Groups []int
+}
+
+// WriteTo
+func (me *Account) WriteTo(w io.Writer) (int64, error) {
+	a := account{
+		Name:   me.name,
+		UID:    me.uid,
+		Groups: me.groups,
+	}
+	return 0, gob.NewEncoder(w).Encode(&a)
+}
+
+// ReadFrom
+func (me *Account) ReadFrom(r io.Reader) (int64, error) {
+	var a account
+	err := gob.NewDecoder(r).Decode(&a)
+	if err != nil {
+		return 0, err
+	}
+	me.name = a.Name
+	me.uid = a.UID
+	me.groups = a.Groups
+	return 0, nil
 }
 
 // gid returns the first group id of the account

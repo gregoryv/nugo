@@ -109,6 +109,7 @@ func (me *Syscall) SaveAs(abspath string, src interface{}) error {
 }
 
 // Save save src to the given abspath. Overwrites existing resource.
+// If src implements io.WriterTo interface that is used otherwise it's gob encoded.
 func (me *Syscall) Save(abspath string, src interface{}) error {
 	rif, _ := me.Stat(abspath)
 	if rif != nil && rif.IsDir() == nil {
@@ -119,16 +120,29 @@ func (me *Syscall) Save(abspath string, src interface{}) error {
 		return wrap("Save", err)
 	}
 	defer w.Close()
-	return wrap("Save", gob.NewEncoder(w).Encode(src))
+	switch src := src.(type) {
+	case io.WriterTo:
+		_, err := src.WriteTo(w)
+		return err
+	default:
+		return wrap("Save", gob.NewEncoder(w).Encode(src))
+	}
 }
 
-// Load
+// Load loads the resource from abspath. If res implements
+// io.ReaderFrom that is used otherwise gob.Decoded.
 func (me *Syscall) Load(res interface{}, abspath string) error {
 	r, err := me.Open(abspath)
 	if err != nil {
 		return fmt.Errorf("Load: %w", err)
 	}
-	return wrap("Load", gob.NewDecoder(r).Decode(res))
+	switch res := res.(type) {
+	case io.ReaderFrom:
+		_, err := res.ReadFrom(r)
+		return err
+	default:
+		return wrap("Load", gob.NewDecoder(r).Decode(res))
+	}
 }
 
 // Install resource at the absolute path
@@ -207,8 +221,7 @@ func (me *Syscall) AddAccount(acc *Account) error {
 	}
 	me.System.accounts = append(me.System.accounts, acc)
 	abspath := fmt.Sprintf("/etc/accounts/%s.acc", acc.name)
-	me.Save(abspath, 00755)
-	return nil
+	return me.Save(abspath, acc)
 }
 
 // Mkdir creates the absolute path whith a given mode where the parent

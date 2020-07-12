@@ -166,3 +166,17 @@ func TestSystem_Install(t *testing.T) {
 	bad(asRoot.Install("/bin/nosuchdir/x", nil, 0))
 	bad(asAnonymous.Install("/bin/x", nil, 0))
 }
+
+func TestSyscall_AddAccount(t *testing.T) {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	ok, bad := asserter.NewErrors(t)
+
+	bad(asRoot.AddAccount(Root))
+	ok(asRoot.AddAccount(NewAccount("john", 3)))
+	var john Account
+	ok(asRoot.Load(&john, "/etc/accounts/john.acc"))
+	assert := asserter.New(t)
+	assert().Equals(john.uid, 3)
+
+}
