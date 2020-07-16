@@ -19,10 +19,6 @@ type Walker struct {
 // SetRecursive
 func (me *Walker) SetRecursive(r bool) { me.w.SetRecursive(r) }
 
-// SkipSibling
-func (me *Walker) SkipSibling() { me.w.SkipSibling() }
-func (me *Walker) SkipVisit()   { me.w.SkipVisit() }
-
 func (me *Walker) Walk(res *ResInfo, fn Visitor) error {
 	// wrap the visitor with access control
 	visitor := func(n *nugo.Node, abspath string, w *nugo.Walker) {

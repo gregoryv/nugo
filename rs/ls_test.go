@@ -43,10 +43,12 @@ func TestLs(t *testing.T) {
 
 func Example_Ls_fix() {
 	asRoot := Root.Use(NewSystem())
-	asRoot.Exec("/bin/mkdir /tidio")
-	asRoot.Fexec(os.Stdout, "/bin/ls", "/tidio")
+	asRoot.Exec("/bin/mkdir /a")
+	asRoot.Exec("/bin/mkdir /a/b")
+	asRoot.Fexec(os.Stdout, "/bin/ls", "-R", "/a")
 	// output:
-	// tidio
+	// /a
+	// /a/b
 }
 
 func ExampleLs() {

@@ -33,6 +33,18 @@ func ExampleNodeLogger() {
 	// d--xrwxr-xr-x 1 1 /tmp/sub
 }
 
+func Example_NodeLogger_child() {
+	root := NewRootNode("/", ModeSort|ModeDistinct)
+	root.SetSeal(1, 1, 01755)
+	tmp := root.Make("tmp")
+	tmp.Make("sub")
+	l := fox.NewSyncLog(os.Stdout)
+	tmp.Walk(NodeLogger(l))
+	// output:
+	// d--xrwxr-xr-x 1 1 /tmp
+	// d--xrwxr-xr-x 1 1 /tmp/sub
+}
+
 func TestWalker_Walk_recursive(t *testing.T) {
 	root := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	root.SetSeal(1, 1, 01755)

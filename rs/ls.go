@@ -20,7 +20,7 @@ func Ls(cmd *Cmd) ExecErr {
 	visitor := func(c *ResInfo, abspath string, w *nugo.Walker) {
 		switch {
 		case *recursive:
-			fmt.Fprintf(cmd.Out, "%s\n", abspath[1:])
+			fmt.Fprintf(cmd.Out, "%s\n", abspath)
 		default:
 			fmt.Fprintf(cmd.Out, "%s\n", c.Name())
 		}
@@ -29,18 +29,21 @@ func Ls(cmd *Cmd) ExecErr {
 		visitor = func(c *ResInfo, abspath string, w *nugo.Walker) {
 			switch {
 			case *recursive:
-				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
+				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath)
 			default:
 				fmt.Fprintf(cmd.Out, "%s\n", c.node)
 			}
 		}
 	}
-	w := NewWalker(cmd.Sys)
-	w.SetRecursive(*recursive)
-	w.SkipSibling()
 	res, err := cmd.Sys.Stat(abspath)
 	if err != nil {
 		return err
 	}
-	return w.Walk(res, visitor)
+	w := NewWalker(cmd.Sys)
+	w.SetRecursive(*recursive)
+	visitor(res, abspath, w.w)
+	if err := res.IsDir(); err != nil {
+		return nil
+	}
+	return w.Walk(&ResInfo{res.node.FirstChild()}, visitor)
 }

@@ -18,12 +18,11 @@ func NewWalker() *Walker {
 
 // Walker holds state of a walk.
 type Walker struct {
-	first       bool
-	recursive   bool
-	skipChild   bool // do not enter a specific directory
-	skipSibling bool
-	skipVisit   bool
-	stopped     bool
+	first     bool
+	recursive bool
+	skipChild bool // do not enter a specific directory
+	skipVisit bool
+	stopped   bool
 }
 
 // Stop the Walker from your visitor.
@@ -36,17 +35,16 @@ func (me *Walker) SetRecursive(r bool) { me.recursive = r }
 // recursive mode and the node is a directory.
 func (me *Walker) SkipChild() { me.skipChild = true }
 
-// SkipSibling tells the walker to skip the next sibling.
-// The field is reset after each node.
-func (me *Walker) SkipSibling() { me.skipSibling = true }
-
-// SkipVisit tells the walker not to call the visitor of the next
-// node. The field is reset after each node.
-func (me *Walker) SkipVisit() { me.skipVisit = true }
-
 // Walk calls the Visitor for the given node and all related.
 func (me *Walker) Walk(node *Node, fn Visitor) {
-	me.walk(node, "", fn)
+	if node == nil {
+		return
+	}
+	var dir string
+	if node.parent != nil {
+		dir = node.parent.AbsPath()
+	}
+	me.walk(node, dir, fn)
 }
 
 func (me *Walker) walk(node *Node, parent string, fn Visitor) {
@@ -55,21 +53,15 @@ func (me *Walker) walk(node *Node, parent string, fn Visitor) {
 	}
 	if !me.first {
 		me.skipChild = false
-		me.skipSibling = false
-		me.skipVisit = false
 	}
 	me.first = false
 	// less allocation over node.AbsPath()
 	abspath := path.Join(parent, node.Name())
-	if !me.skipVisit {
-		fn(node, abspath, me)
-	}
+	fn(node, abspath, me)
 	if (node.isRoot() || me.recursive) && !me.skipChild {
 		me.walk(node.child, abspath, fn)
 	}
-	if !me.skipSibling {
-		me.walk(node.sibling, parent, fn)
-	}
+	me.walk(node.sibling, parent, fn)
 }
 
 // Visitor is called during a walk with a specific node and the
