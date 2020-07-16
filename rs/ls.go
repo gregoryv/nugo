@@ -39,5 +39,7 @@ func Ls(cmd *Cmd) ExecErr {
 			}
 		}
 	}
-	return cmd.Sys.Walk(abspath, *recursive, visitor)
+	w := NewWalker(cmd.Sys)
+	w.SetRecursive(*recursive)
+	return w.Walk(abspath, visitor)
 }

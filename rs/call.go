@@ -282,34 +282,6 @@ func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
 	return me.System.mount(rn)
 }
 
-func (me *Syscall) Walk(abspath string, recursive bool, fn Visitor) error {
-	n, err := me.stat(abspath)
-	if err != nil {
-		return err
-	}
-	w := nugo.NewWalker()
-	w.SetRecursive(recursive)
-	// wrap the visitor with access control
-	visitor := func(parent, child *nugo.Node, abspath string, w *nugo.Walker) {
-		n := parent
-		if parent == nil {
-			n = child
-		}
-		if me.acc.permitted(OpExec, n) != nil {
-			w.SkipChild()
-			return
-		}
-		var p *ResInfo
-		if parent != nil {
-			p = &ResInfo{parent}
-		}
-		c := &ResInfo{child}
-		fn(p, c, abspath, w)
-	}
-	w.Walk(n.Parent(), n, path.Dir(abspath), visitor)
-	return nil
-}
-
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given Walker to stop if needed.
 // For root nodes the parent is nil.
