@@ -259,6 +259,7 @@ func (me *Syscall) stat(abspath string) (*nugo.Node, error) {
 		return nil, err
 	}
 	parent := n.Parent()
+	// check each parent for access
 	for parent != nil {
 		if err := me.acc.permitted(OpExec, parent); err != nil {
 			return nil, fmt.Errorf("%s uid:%d: %v", abspath, me.acc.uid, err)

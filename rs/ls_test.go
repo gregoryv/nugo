@@ -47,14 +47,12 @@ func Example_Ls_fix() {
 	asRoot.Exec("/bin/mkdir /a/b")
 	asRoot.Fexec(os.Stdout, "/bin/ls", "-R", "/a")
 	// output:
-	// /a
 	// /a/b
 }
 
 func ExampleLs() {
 	Anonymous.Use(NewSystem()).Fexec(os.Stdout, "/bin/ls", "/")
 	// output:
-	// /
 	// bin
 	// etc
 	// tmp
@@ -63,7 +61,6 @@ func ExampleLs() {
 func ExampleLs_longListFormat() {
 	Anonymous.Use(NewSystem()).Fexec(os.Stdout, "/bin/ls", "-l", "/")
 	// output:
-	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 bin
 	// d---rwxr-xr-x 1 1 etc
 	// drwxrwxrwxrwx 1 1 tmp

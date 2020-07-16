@@ -144,15 +144,15 @@ func ExampleSyscall_Stat() {
 	// Stat /etc/accounts/root.acc uid:0: d---rwxr-xr-x 1 1 exec denied
 }
 
-func TestSystem_Stat(t *testing.T) {
-	var (
-		Stat    = Anonymous.Use(NewSystem()).Stat
-		ok, bad = asserter.NewMixed(t)
-	)
-	ok(Stat("/"))
-	ok(Stat("/bin"))
-	bad(Stat("/etc/accounts.gob"))
-	bad(Stat("/nothing"))
+func TestSystem_Stat_ok(t *testing.T) {
+	sys := NewSystem()
+	asRoot := Root.Use(sys)
+	//asAnonymous := Anonymous.Use(sys)
+	ok, _ := asserter.NewMixed(t)
+	//ok(asAnonymous.Stat("/"))
+	ok(asRoot.Stat("/bin"))
+	//	bad(asAnonymous.Stat("/etc/accounts.gob"))
+	//bad(asRoot.Stat("/nothing"))
 }
 
 func TestSystem_Install(t *testing.T) {
@@ -171,12 +171,10 @@ func TestSyscall_AddAccount(t *testing.T) {
 	sys := NewSystem()
 	asRoot := Root.Use(sys)
 	ok, bad := asserter.NewErrors(t)
-
 	bad(asRoot.AddAccount(Root))
 	ok(asRoot.AddAccount(NewAccount("john", 3)))
 	var john Account
 	ok(asRoot.Load(&john, "/etc/accounts/john.acc"))
 	assert := asserter.New(t)
 	assert().Equals(john.uid, 3)
-
 }

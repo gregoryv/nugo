@@ -25,26 +25,13 @@ type Walker struct {
 	stopped   bool
 }
 
-// Stop the Walker from your visitor.
-func (me *Walker) Stop() { me.stopped = true }
-
-// SetRecursive
-func (me *Walker) SetRecursive(r bool) { me.recursive = r }
-
-// Skip tells the walker not do descend into this node if it's in
-// recursive mode and the node is a directory.
-func (me *Walker) SkipChild() { me.skipChild = true }
-
-// Walk calls the Visitor for the given node and all related.
+// Walk calls the Visitor for the given nodes children and siblings.
+// The given node is not visited.
 func (me *Walker) Walk(node *Node, fn Visitor) {
 	if node == nil {
 		return
 	}
-	var dir string
-	if node.parent != nil {
-		dir = node.parent.AbsPath()
-	}
-	me.walk(node, dir, fn)
+	me.walk(node.FirstChild(), node.AbsPath(), fn)
 }
 
 func (me *Walker) walk(node *Node, parent string, fn Visitor) {
@@ -63,6 +50,16 @@ func (me *Walker) walk(node *Node, parent string, fn Visitor) {
 	}
 	me.walk(node.sibling, parent, fn)
 }
+
+// Stop the Walker from your visitor.
+func (me *Walker) Stop() { me.stopped = true }
+
+// SetRecursive
+func (me *Walker) SetRecursive(r bool) { me.recursive = r }
+
+// Skip tells the walker not do descend into this node if it's in
+// recursive mode and the node is a directory.
+func (me *Walker) SkipChild() { me.skipChild = true }
 
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given Walker to stop if needed.

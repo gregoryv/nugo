@@ -16,7 +16,6 @@ func ExampleNodePrinter() {
 	root.Make("etc") // inherits parent mode
 	root.Walk(NodePrinter(os.Stdout))
 	// output:
-	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 /etc
 }
 
@@ -28,7 +27,6 @@ func ExampleNodeLogger() {
 	l := fox.NewSyncLog(os.Stdout)
 	root.Walk(NodeLogger(l))
 	// output:
-	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 /tmp
 	// d--xrwxr-xr-x 1 1 /tmp/sub
 }
@@ -41,7 +39,6 @@ func Example_NodeLogger_child() {
 	l := fox.NewSyncLog(os.Stdout)
 	tmp.Walk(NodeLogger(l))
 	// output:
-	// d--xrwxr-xr-x 1 1 /tmp
 	// d--xrwxr-xr-x 1 1 /tmp/sub
 }
 

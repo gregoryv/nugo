@@ -12,7 +12,6 @@ func Example() {
 	tmp.Make("y.txt")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
-	// /
 	// /etc
 	// /tmp
 	// /tmp/y.txt
@@ -32,7 +31,6 @@ func Example_graphManipulation() {
 		}
 	})
 	// output:
-	// /
 	// /etc
 	// /tmp
 	// /tmp/y.txt

@@ -83,10 +83,11 @@ func TestNode_SetSource(t *testing.T) {
 	}
 }
 
-func TestRootNode_Find(t *testing.T) {
+func TestNode_Find(t *testing.T) {
 	rn := NewRootNode("/", ModeDir|ModeSort|ModeDistinct)
 	a := rn.Make("a")
 	ok, bad := asserter.NewMixed(t)
+	ok(rn.Find("/a"))
 	ok(rn.Find("/"))
 	bad(rn.Find("/nosuch"))
 	bad(a.Find("something")).Log("not root")
@@ -99,7 +100,6 @@ func Example_sortedDistinct() {
 	root.Make("a")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
-	// /
 	// /a
 	// /b
 	// /b/1
@@ -113,7 +113,6 @@ func Example_sorted() {
 	b.MakeAll("2", "1", "3", "0", "2.5")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
-	// /
 	// /a
 	// /b
 	// /b/0
@@ -133,7 +132,6 @@ func ExampleNewRootNode() {
 	root.Make("b")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
-	// /mnt/usb
 	// /mnt/usb/a
 	// /mnt/usb/a/file.txt
 	// /mnt/usb/b
@@ -168,7 +166,6 @@ func ExampleRootNode_Walk() {
 		}
 	})
 	// output:
-	// /
 	// /a
 	// /a/b
 	// /a/1
@@ -190,7 +187,6 @@ func ExampleNode_DelChild() {
 	tmp.DelChild("x.gz")
 	root.Walk(NamePrinter(os.Stdout))
 	// output:
-	// /
 	// /bin
 	// /tmp
 	// /tmp/y.txt

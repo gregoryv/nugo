@@ -297,8 +297,11 @@ func (me *Node) Find(abspath string) (*Node, error) {
 		return nil, fmt.Errorf("Find: %w", err)
 	}
 	fullname := path.Clean(abspath)
+	if fullname == me.Name() {
+		return me, nil
+	}
 	var n *Node
-	me.Walk(func(child *Node, abspath string, w *Walker) {
+	visitor := func(child *Node, abspath string, w *Walker) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
@@ -306,7 +309,9 @@ func (me *Node) Find(abspath string) (*Node, error) {
 		if !strings.HasPrefix(fullname, abspath) {
 			w.SkipChild() // don't descend into this child
 		}
-	})
+	}
+	walker := NewWalker()
+	walker.Walk(me, visitor)
 	if n == nil {
 		return nil, fmt.Errorf("%s no such directory or resource", abspath)
 	}
