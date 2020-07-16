@@ -304,7 +304,7 @@ func (me *Node) Find(abspath string) (*Node, error) {
 			w.Stop()
 		}
 		if !strings.HasPrefix(fullname, abspath) {
-			w.Skip() // don't descend into this child
+			w.SkipChild() // don't descend into this child
 		}
 	})
 	if n == nil {

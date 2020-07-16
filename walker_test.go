@@ -60,7 +60,7 @@ func TestWalker_Skip(t *testing.T) {
 	visitor := func(p, c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(&buf, abspath)
 		if abspath == "/tmp" {
-			w.Skip()
+			w.SkipChild()
 		}
 	}
 	walker.Walk(nil, root, "", visitor)
