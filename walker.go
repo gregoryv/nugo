@@ -22,6 +22,7 @@ type Walker struct {
 	recursive   bool
 	skipChild   bool // do not enter a specific directory
 	skipSibling bool
+	skipVisit   bool
 	stopped     bool
 }
 
@@ -35,6 +36,14 @@ func (me *Walker) SetRecursive(r bool) { me.recursive = r }
 // recursive mode and the node is a directory.
 func (me *Walker) SkipChild() { me.skipChild = true }
 
+// SkipSibling tells the walker to skip the next sibling.
+// The field is reset after each node.
+func (me *Walker) SkipSibling() { me.skipSibling = true }
+
+// SkipVisit tells the walker not to call the visitor of the next
+// node. The field is reset after each node.
+func (me *Walker) SkipVisit() { me.skipVisit = true }
+
 // Walk calls the Visitor for the given node. The abspath is
 // that of the child. Use empty string for root node.
 func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
@@ -44,11 +53,14 @@ func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 	if !me.first {
 		me.skipChild = false
 		me.skipSibling = false
+		me.skipVisit = false
 	}
 	me.first = false
 	// less allocation over child.AbsPath()
 	childAbspath := path.Join(abspath, child.Name())
-	fn(parent, child, childAbspath, me)
+	if !me.skipVisit {
+		fn(parent, child, childAbspath, me)
+	}
 	if (child.isRoot() || me.recursive) && !me.skipChild {
 		me.Walk(child, child.child, childAbspath, fn)
 	}

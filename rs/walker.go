@@ -1,8 +1,6 @@
 package rs
 
 import (
-	"path"
-
 	"github.com/gregoryv/nugo"
 )
 
@@ -21,11 +19,11 @@ type Walker struct {
 // SetRecursive
 func (me *Walker) SetRecursive(r bool) { me.w.SetRecursive(r) }
 
-func (me *Walker) Walk(abspath string, fn Visitor) error {
-	n, err := me.sys.stat(abspath)
-	if err != nil {
-		return err
-	}
+// SkipSibling
+func (me *Walker) SkipSibling() { me.w.SkipSibling() }
+func (me *Walker) SkipVisit()   { me.w.SkipVisit() }
+
+func (me *Walker) Walk(res *ResInfo, fn Visitor) error {
 	// wrap the visitor with access control
 	visitor := func(parent, child *nugo.Node, abspath string, w *nugo.Walker) {
 		n := parent
@@ -43,6 +41,12 @@ func (me *Walker) Walk(abspath string, fn Visitor) error {
 		c := &ResInfo{child}
 		fn(p, c, abspath, w)
 	}
-	me.w.Walk(n.Parent(), n, path.Dir(abspath), visitor)
+	n := res.node
+	parent := n.Parent()
+	var abspath string
+	if parent != nil {
+		abspath = n.AbsPath()
+	}
+	me.w.Walk(parent, n, abspath, visitor)
 	return nil
 }
