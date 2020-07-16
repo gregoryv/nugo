@@ -53,13 +53,10 @@ func (me *Account) WriteTo(w io.Writer) (int64, error) {
 func (me *Account) ReadFrom(r io.Reader) (int64, error) {
 	var a account
 	err := gob.NewDecoder(r).Decode(&a)
-	if err != nil {
-		return 0, err
-	}
 	me.name = a.Name
 	me.uid = a.UID
 	me.groups = a.Groups
-	return 0, nil
+	return 0, err
 }
 
 // gid returns the first group id of the account
