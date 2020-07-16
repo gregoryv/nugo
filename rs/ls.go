@@ -10,6 +10,7 @@ import (
 // Ls lists resources
 func Ls(cmd *Cmd) ExecErr {
 	flags := flag.NewFlagSet("ls", flag.ContinueOnError)
+	longList := flags.Bool("l", false, "use a long listing format")
 	recursive := flags.Bool("R", false, "recursive")
 	flags.SetOutput(cmd.Out)
 	if err := flags.Parse(cmd.Args); err != nil {
@@ -19,11 +20,23 @@ func Ls(cmd *Cmd) ExecErr {
 	visitor := func(p, c *ResInfo, abspath string, w *nugo.Walker) {
 		switch {
 		case p == nil:
-			fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), c.Name())
+			fmt.Fprintf(cmd.Out, "%s\n", c.Name())
 		case *recursive:
-			fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
+			fmt.Fprintf(cmd.Out, "%s\n", abspath[1:])
 		default:
-			fmt.Fprintf(cmd.Out, "%s\n", c.node)
+			fmt.Fprintf(cmd.Out, "%s\n", c.Name())
+		}
+	}
+	if *longList {
+		visitor = func(p, c *ResInfo, abspath string, w *nugo.Walker) {
+			switch {
+			case p == nil:
+				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), c.Name())
+			case *recursive:
+				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
+			default:
+				fmt.Fprintf(cmd.Out, "%s\n", c.node)
+			}
 		}
 	}
 	return cmd.Sys.Walk(abspath, *recursive, visitor)

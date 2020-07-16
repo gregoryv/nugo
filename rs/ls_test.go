@@ -19,7 +19,7 @@ func TestLs(t *testing.T) {
 	bad(asRoot.Exec("/bin/ls /nosuch"))
 	// ls directory is covered by Examples
 	// ls file
-	asRoot.Fexec(&buf, "/bin/ls", "/etc/accounts/root.acc")
+	asRoot.Fexec(&buf, "/bin/ls", "-l", "/etc/accounts/root.acc")
 	exp := "----rw-r--r-- 1 1 root.acc\n"
 	assert := asserter.New(t)
 	assert().Equals(buf.String(), exp)
@@ -32,10 +32,26 @@ func TestLs(t *testing.T) {
 	if strings.Contains(buf.String(), "/etc/accounts") {
 		t.Error("listed /etc")
 	}
+
+	// only list accessible in long format
+	buf.Reset()
+	ok(asJohn.Fexec(&buf, "/bin/ls", "-R", "-l", "/"))
+	if strings.Contains(buf.String(), "/etc/accounts") {
+		t.Error("listed /etc")
+	}
 }
 
 func ExampleLs() {
 	Anonymous.Use(NewSystem()).Fexec(os.Stdout, "/bin/ls", "/")
+	// output:
+	// /
+	// bin
+	// etc
+	// tmp
+}
+
+func ExampleLs_longListFormat() {
+	Anonymous.Use(NewSystem()).Fexec(os.Stdout, "/bin/ls", "-l", "/")
 	// output:
 	// d--xrwxr-xr-x 1 1 /
 	// d--xrwxr-xr-x 1 1 bin
@@ -49,4 +65,5 @@ func ExampleLs_help() {
 	// output:
 	// Usage of ls:
 	//   -R	recursive
+	//   -l	use a long listing format
 }

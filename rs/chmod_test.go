@@ -21,9 +21,9 @@ func TestChmod(t *testing.T) {
 
 func ExampleChmod() {
 	asRoot := Root.Use(NewSystem())
-	asRoot.Fexec(os.Stdout, "/bin/ls", "/tmp") // before
+	asRoot.Fexec(os.Stdout, "/bin/ls", "-l", "/tmp") // before
 	asRoot.Exec("/bin/chmod -m 01755 /tmp")
-	asRoot.Fexec(os.Stdout, "/bin/ls", "/tmp") // after
+	asRoot.Fexec(os.Stdout, "/bin/ls", "-l", "/tmp") // after
 	// output:
 	// drwxrwxrwxrwx 1 1 tmp
 	// d--xrwxr-xr-x 1 1 tmp
