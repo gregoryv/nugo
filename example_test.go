@@ -25,7 +25,7 @@ func Example_graphManipulation() {
 	tmp.MakeAll("y.txt", "dir")
 	tmp.DelChild("dir")
 
-	root.Walk(func(parent, child *Node, abspath string, w *Walker) {
+	root.Walk(func(child *Node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/tmp/y.txt" {
 			w.Stop()

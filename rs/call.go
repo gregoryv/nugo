@@ -284,5 +284,4 @@ func (me *Syscall) mount(abspath string, mode nugo.NodeMode) error {
 
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given Walker to stop if needed.
-// For root nodes the parent is nil.
-type Visitor func(parent, child *ResInfo, abspath string, w *nugo.Walker)
+type Visitor func(child *ResInfo, abspath string, w *nugo.Walker)

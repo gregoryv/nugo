@@ -44,10 +44,13 @@ func (me *Walker) SkipSibling() { me.skipSibling = true }
 // node. The field is reset after each node.
 func (me *Walker) SkipVisit() { me.skipVisit = true }
 
-// Walk calls the Visitor for the given node. The abspath is
-// that of the child. Use empty string for root node.
-func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
-	if child == nil || me.stopped {
+// Walk calls the Visitor for the given node and all related.
+func (me *Walker) Walk(node *Node, fn Visitor) {
+	me.walk(node, "", fn)
+}
+
+func (me *Walker) walk(node *Node, parent string, fn Visitor) {
+	if node == nil || me.stopped {
 		return
 	}
 	if !me.first {
@@ -56,43 +59,43 @@ func (me *Walker) Walk(parent, child *Node, abspath string, fn Visitor) {
 		me.skipVisit = false
 	}
 	me.first = false
-	// less allocation over child.AbsPath()
-	childAbspath := path.Join(abspath, child.Name())
+	// less allocation over node.AbsPath()
+	abspath := path.Join(parent, node.Name())
 	if !me.skipVisit {
-		fn(parent, child, childAbspath, me)
+		fn(node, abspath, me)
 	}
-	if (child.isRoot() || me.recursive) && !me.skipChild {
-		me.Walk(child, child.child, childAbspath, fn)
+	if (node.isRoot() || me.recursive) && !me.skipChild {
+		me.walk(node.child, abspath, fn)
 	}
 	if !me.skipSibling {
-		me.Walk(parent, child.sibling, abspath, fn)
+		me.walk(node.sibling, parent, fn)
 	}
 }
 
 // Visitor is called during a walk with a specific node and the
 // absolute path to that node. Use the given Walker to stop if needed.
 // For root nodes the parent is nil.
-type Visitor func(parent, child *Node, abspath string, w *Walker)
+type Visitor func(node *Node, abspath string, w *Walker)
 
 // ----------------------------------------
 
 // NamePrinter writes abspath to the given writer.
-func NamePrinter(w io.Writer) Visitor {
-	return func(parent, child *Node, abspath string, Walker *Walker) {
-		fmt.Fprintln(w, abspath)
+func NamePrinter(writer io.Writer) Visitor {
+	return func(child *Node, abspath string, w *Walker) {
+		fmt.Fprintln(writer, abspath)
 	}
 }
 
 // NodePrinter writes permissions and ownership with each node
-func NodePrinter(w io.Writer) Visitor {
-	return func(parent, child *Node, abspath string, Walker *Walker) {
-		fmt.Fprintln(w, child.Seal().String(), abspath)
+func NodePrinter(writer io.Writer) Visitor {
+	return func(child *Node, abspath string, w *Walker) {
+		fmt.Fprintln(writer, child.Seal().String(), abspath)
 	}
 }
 
 // NodeLogger logs permissions and ownership with each node
 func NodeLogger(l fox.Logger) Visitor {
-	return func(parent, child *Node, abspath string, Walker *Walker) {
+	return func(child *Node, abspath string, w *Walker) {
 		l.Log(fmt.Sprintf("%s %s", child.Seal().String(), abspath))
 	}
 }

@@ -161,7 +161,7 @@ func ExampleRootNode_Walk() {
 	c := root.Make("c")
 	a.MakeAll("b", "1")
 	c.MakeAll("x", "y")
-	root.Walk(func(parent, c *Node, abspath string, w *Walker) {
+	root.Walk(func(c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(os.Stdout, abspath)
 		if abspath == "/c/x" {
 			w.Stop()

@@ -41,10 +41,10 @@ func TestWalker_Walk_recursive(t *testing.T) {
 	walker := NewWalker()
 	walker.SetRecursive(false) // recursive by default
 	var buf bytes.Buffer
-	visitor := func(p, c *Node, abspath string, w *Walker) {
+	visitor := func(c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(&buf, abspath)
 	}
-	walker.Walk(nil, root, "", visitor)
+	walker.Walk(root, visitor)
 	if strings.Contains(buf.String(), "sub") {
 		t.Error("contains sub:", buf.String())
 	}
@@ -57,13 +57,13 @@ func TestWalker_Skip(t *testing.T) {
 	tmp.Make("sub")
 	walker := NewWalker()
 	var buf bytes.Buffer
-	visitor := func(p, c *Node, abspath string, w *Walker) {
+	visitor := func(c *Node, abspath string, w *Walker) {
 		fmt.Fprintln(&buf, abspath)
 		if abspath == "/tmp" {
 			w.SkipChild()
 		}
 	}
-	walker.Walk(nil, root, "", visitor)
+	walker.Walk(root, visitor)
 	if strings.Contains(buf.String(), "sub") {
 		t.Error("contains sub:", buf.String())
 	}

@@ -41,6 +41,14 @@ func TestLs(t *testing.T) {
 	}
 }
 
+func Example_Ls_fix() {
+	asRoot := Root.Use(NewSystem())
+	asRoot.Exec("/bin/mkdir /tidio")
+	asRoot.Fexec(os.Stdout, "/bin/ls", "/tidio")
+	// output:
+	// tidio
+}
+
 func ExampleLs() {
 	Anonymous.Use(NewSystem()).Fexec(os.Stdout, "/bin/ls", "/")
 	// output:

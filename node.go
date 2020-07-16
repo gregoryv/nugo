@@ -298,7 +298,7 @@ func (me *Node) Find(abspath string) (*Node, error) {
 	}
 	fullname := path.Clean(abspath)
 	var n *Node
-	me.Walk(func(parent, child *Node, abspath string, w *Walker) {
+	me.Walk(func(child *Node, abspath string, w *Walker) {
 		if fullname == abspath {
 			n = child
 			w.Stop()
@@ -315,6 +315,5 @@ func (me *Node) Find(abspath string) (*Node, error) {
 
 // Walk over each node until Walker is stopped.
 func (me *Node) Walk(fn Visitor) {
-	// todo adapt for walking from a child
-	NewWalker().Walk(me.Parent(), me, "", fn)
+	NewWalker().Walk(me, fn)
 }

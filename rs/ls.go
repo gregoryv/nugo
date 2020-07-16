@@ -17,10 +17,8 @@ func Ls(cmd *Cmd) ExecErr {
 		return err
 	}
 	abspath := flags.Arg(0)
-	visitor := func(p, c *ResInfo, abspath string, w *nugo.Walker) {
+	visitor := func(c *ResInfo, abspath string, w *nugo.Walker) {
 		switch {
-		case p == nil:
-			fmt.Fprintf(cmd.Out, "%s\n", c.Name())
 		case *recursive:
 			fmt.Fprintf(cmd.Out, "%s\n", abspath[1:])
 		default:
@@ -28,10 +26,8 @@ func Ls(cmd *Cmd) ExecErr {
 		}
 	}
 	if *longList {
-		visitor = func(p, c *ResInfo, abspath string, w *nugo.Walker) {
+		visitor = func(c *ResInfo, abspath string, w *nugo.Walker) {
 			switch {
-			case p == nil:
-				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), c.Name())
 			case *recursive:
 				fmt.Fprintf(cmd.Out, "%s %s\n", c.node.Seal(), abspath[1:])
 			default:
