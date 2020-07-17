@@ -28,9 +28,6 @@ type Walker struct {
 // Walk calls the Visitor for the given nodes children and siblings.
 // The given node is not visited.
 func (me *Walker) Walk(node *Node, fn Visitor) {
-	if node == nil {
-		return
-	}
 	me.walk(node.FirstChild(), node.AbsPath(), fn)
 }
 
