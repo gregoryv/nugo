@@ -75,6 +75,17 @@ func ExampleNode_UnsetMode() {
 	// ---xrwxr-xr-x 0 0 node
 }
 
+func ExampleNode_SetMode() {
+	n := NewNode("node")
+	n.mode = 01755
+	fmt.Println(n)
+	n.SetMode(ModeDir)
+	fmt.Println(n)
+	// output:
+	// ---xrwxr-xr-x 0 0 node
+	// d--xrwxr-xr-x 0 0 node
+}
+
 func TestNode_SetSource(t *testing.T) {
 	n := NewNode("val")
 	n.SetSource(1)

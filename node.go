@@ -64,7 +64,7 @@ func NewNode(name string) *Node {
 	return &Node{name: safe}
 }
 
-// node names and links a sibling and a child.
+// Node names and links a sibling and a child.
 type Node struct {
 	name    string
 	parent  *Node
@@ -126,7 +126,12 @@ func (me *Node) IsRoot() error {
 
 func (me *Node) isRoot() bool { return me.mode&ModeRoot != 0 }
 
-// UnsetMode todo
+// SetMode sets mode of this node.
+func (my *Node) SetMode(mode NodeMode) {
+	my.mode = my.mode | mode
+}
+
+// UnsetMode unsets the given mode
 func (me *Node) UnsetMode(mask NodeMode) {
 	me.mode = me.mode &^ mask
 }
@@ -139,7 +144,7 @@ func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
 }
 
 // Make creates and adds the named child returning the new node.
-// The new node as ModeDir set.
+// See Add method for mode inheritence.
 func (me *Node) Make(name string) *Node {
 	n := NewNode(name)
 	me.Add(n)
