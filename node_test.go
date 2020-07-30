@@ -34,7 +34,7 @@ func TestNode_Source(t *testing.T) {
 
 func TestNode_IsDir(t *testing.T) {
 	file := &Node{}
-	dir := &Node{mode: ModeDir}
+	dir := &Node{Seal: Seal{Mode: ModeDir}}
 	assert := asserter.New(t)
 	assert(!file.IsDir())
 	assert(dir.IsDir())
@@ -66,7 +66,7 @@ func TestRootNode_Sibling(t *testing.T) {
 
 func ExampleNode_UnsetMode() {
 	n := NewNode("node")
-	n.mode = ModeDir | 01755
+	n.Mode = ModeDir | 01755
 	fmt.Println(n)
 	n.UnsetMode(ModeDir)
 	fmt.Println(n)
@@ -77,7 +77,7 @@ func ExampleNode_UnsetMode() {
 
 func ExampleNode_SetMode() {
 	n := NewNode("node")
-	n.mode = 01755
+	n.Mode = 01755
 	fmt.Println(n)
 	n.SetMode(ModeDir)
 	fmt.Println(n)

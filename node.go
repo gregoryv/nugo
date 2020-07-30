@@ -43,7 +43,7 @@ import (
 // NewRootNode returns a root node with the additional given mode.
 func NewRootNode(abspath string, mode NodeMode) *Node {
 	n := NewRoot(abspath)
-	n.mode = n.mode | mode
+	n.Mode = n.Mode | mode
 	return n
 }
 
@@ -52,10 +52,11 @@ func NewRootNode(abspath string, mode NodeMode) *Node {
 // Valid abspaths are "/" or "/mnt/usb".
 // Defaults to mode ModeDir | ModeRoot.
 func NewRoot(abspath string) *Node {
-	return &Node{
-		mode: ModeDir | ModeRoot,
+	n := &Node{
 		name: path.Clean(abspath),
 	}
+	n.Mode = ModeDir | ModeRoot
+	return n
 }
 
 // NewNode returns a new node with the given name url path escaped.
@@ -71,9 +72,7 @@ type Node struct {
 	child   *Node
 	sibling *Node
 
-	uid  int
-	gid  int
-	mode NodeMode
+	Seal
 
 	sync.RWMutex
 	src interface{}
@@ -93,28 +92,17 @@ func (my *Node) Name() string { return my.name }
 // Source returns the nodes resource or nil if none is set
 func (my *Node) Source() interface{} { return my.src }
 
-// Seal returns the access control seal of this node.
-func (my *Node) Seal() Seal {
-	return Seal{UID: my.uid, GID: my.gid, Mode: my.mode}
-}
-
-// SetUID sets the owner id of this node.
-func (my *Node) SetUID(uid int) { my.uid = uid }
-
-// SetGID sets group owner of this node.
-func (my *Node) SetGID(gid int) { my.gid = gid }
-
 // SetPerm permission bits of this node.
 func (my *Node) SetPerm(perm NodeMode) {
-	mode := my.mode &^ ModePerm // clear previous
-	my.mode = mode | perm
+	Mode := my.Mode &^ ModePerm // clear previous
+	my.Mode = Mode | perm
 }
 
 // SetSource of this node, use nil to clear
 func (my *Node) SetSource(r interface{}) { my.src = r }
 
 // IsDir returns true if ModeDir is set
-func (me *Node) IsDir() bool { return me.mode&ModeDir != 0 }
+func (me *Node) IsDir() bool { return me.Mode&ModeDir != 0 }
 
 // IsRoot
 func (me *Node) IsRoot() error {
@@ -124,23 +112,23 @@ func (me *Node) IsRoot() error {
 	return nil
 }
 
-func (me *Node) isRoot() bool { return me.mode&ModeRoot != 0 }
+func (me *Node) isRoot() bool { return me.Mode&ModeRoot != 0 }
 
 // SetMode sets mode of this node.
-func (my *Node) SetMode(mode NodeMode) {
-	my.mode = my.mode | mode
+func (my *Node) SetMode(Mode NodeMode) {
+	my.Mode = my.Mode | Mode
 }
 
 // UnsetMode unsets the given mode
 func (me *Node) UnsetMode(mask NodeMode) {
-	me.mode = me.mode &^ mask
+	me.Mode = me.Mode &^ mask
 }
 
 // SetSeal sets ownership and permission mode of the this node.
-func (my *Node) SetSeal(uid, gid int, mode NodeMode) {
-	my.SetUID(uid)
-	my.SetGID(gid)
-	my.SetPerm(mode)
+func (my *Node) SetSeal(uid, gid int, Mode NodeMode) {
+	my.UID = uid
+	my.GID = gid
+	my.SetPerm(Mode)
 }
 
 // Make creates and adds the named child returning the new node.
@@ -166,15 +154,15 @@ func (me *Node) MakeAll(names ...string) []*Node {
 func (me *Node) Add(children ...*Node) {
 	for _, n := range children {
 		// inherit
-		n.uid = me.uid
-		n.gid = me.gid
-		n.mode = me.mode &^ ModeRoot
+		n.UID = me.UID
+		n.GID = me.GID
+		n.Mode = me.Mode &^ ModeRoot
 		n.parent = me
-		if n.mode&ModeDistinct == ModeDistinct {
+		if n.Mode&ModeDistinct == ModeDistinct {
 			me.delChild(n.Name())
 		}
 		switch {
-		case n.mode&ModeSort == ModeSort:
+		case n.Mode&ModeSort == ModeSort:
 			me.insert(n)
 		default:
 			me.append(n)
@@ -292,7 +280,7 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 
 // String todo
 func (me *Node) String() string {
-	return fmt.Sprintf("%s %s", me.Seal(), me.name)
+	return fmt.Sprintf("%s %s", me.Seal, me.name)
 }
 
 // Find returns the node matching the absolute path. This node must be

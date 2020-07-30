@@ -75,13 +75,13 @@ func NamePrinter(writer io.Writer) Visitor {
 // NodePrinter writes permissions and ownership with each node
 func NodePrinter(writer io.Writer) Visitor {
 	return func(child *Node, abspath string, w *Walker) {
-		fmt.Fprintln(writer, child.Seal().String(), abspath)
+		fmt.Fprintln(writer, child.Seal.String(), abspath)
 	}
 }
 
 // NodeLogger logs permissions and ownership with each node
 func NodeLogger(l fox.Logger) Visitor {
 	return func(child *Node, abspath string, w *Walker) {
-		l.Log(fmt.Sprintf("%s %s", child.Seal().String(), abspath))
+		l.Log(fmt.Sprintf("%s %s", child.Seal.String(), abspath))
 	}
 }
