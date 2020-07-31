@@ -52,9 +52,9 @@ func addRec(Parent *nugo.Node, nodes, level int, count *int) {
 		return
 	}
 	for i := 0; i < nodes; i++ {
-		child := nugo.NewNode(fmt.Sprintf("%v", i))
-		Parent.Add(child)
+		Child := nugo.NewNode(fmt.Sprintf("%v", i))
+		Parent.Add(Child)
 		*count = *count + 1
-		addRec(child, nodes, (level - 1), count)
+		addRec(Child, nodes, (level - 1), count)
 	}
 }

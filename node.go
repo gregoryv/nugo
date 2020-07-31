@@ -73,7 +73,7 @@ type Node struct {
 
 	sync.RWMutex
 	Parent  *Node
-	child   *Node
+	Child   *Node
 	sibling *Node
 }
 
@@ -172,7 +172,7 @@ func (me *Node) Add(children ...*Node) {
 func (me *Node) append(n *Node) {
 	last := me.LastChild()
 	if last == nil {
-		me.child = n
+		me.Child = n
 		return
 	}
 	last.sibling = n
@@ -181,13 +181,13 @@ func (me *Node) append(n *Node) {
 // insert the node sorted by name
 func (me *Node) insert(n *Node) {
 	switch {
-	case me.child == nil:
-		me.child = n
-	case n.Name < me.child.Name:
-		n.sibling = me.child
-		me.child = n
+	case me.Child == nil:
+		me.Child = n
+	case n.Name < me.Child.Name:
+		n.sibling = me.Child
+		me.Child = n
 	default:
-		me.insertSibling(me.child, n)
+		me.insertSibling(me.Child, n)
 	}
 }
 
@@ -208,14 +208,14 @@ func (me *Node) insertSibling(c, n *Node) {
 }
 
 // FirstChild returns the first child or nil if there are no children.
-func (me *Node) FirstChild() *Node { return me.child }
+func (me *Node) FirstChild() *Node { return me.Child }
 
 // LastChild returns the last child or nil if there are no children.
 func (me *Node) LastChild() *Node {
-	if me.child == nil {
+	if me.Child == nil {
 		return nil
 	}
-	last := me.child
+	last := me.Child
 	for {
 		if last.sibling == nil {
 			break
@@ -225,16 +225,13 @@ func (me *Node) LastChild() *Node {
 	return last
 }
 
-// Child returns child of this node.
-func (my *Node) Child() *Node { return my.child }
-
 // Sibling
 func (my *Node) Sibling() *Node { return my.sibling }
 
 // Copy returns a copy of the node without relations and no source.
 func (me *Node) Copy() *Node {
 	cp := *me
-	cp.child = nil
+	cp.Child = nil
 	cp.sibling = nil
 	cp.Content = nil
 	return &cp
@@ -248,15 +245,15 @@ func (me *Node) DelChild(name string) *Node {
 }
 
 func (me *Node) delChild(name string) *Node {
-	if me.child == nil {
+	if me.Child == nil {
 		return nil
 	}
-	next := me.child
+	next := me.Child
 	if next.Name == name {
-		me.child = next.sibling
+		me.Child = next.sibling
 		return next
 	}
-	return me.delSibling(me.child, name)
+	return me.delSibling(me.Child, name)
 }
 
 func (me *Node) delSibling(c *Node, name string) *Node {
@@ -290,9 +287,9 @@ func (me *Node) Find(abspath string) (*Node, error) {
 		return me, nil
 	}
 	var n *Node
-	visitor := func(child *Node, abspath string, w *Walker) {
+	visitor := func(Child *Node, abspath string, w *Walker) {
 		if fullname == abspath {
-			n = child
+			n = Child
 			w.Stop()
 		}
 		if !strings.HasPrefix(fullname, abspath) {
