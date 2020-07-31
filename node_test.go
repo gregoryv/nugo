@@ -18,18 +18,12 @@ func TestNode_AbsPath(t *testing.T) {
 }
 
 func TestNode_Copy(t *testing.T) {
-	n := &Node{src: 1}
+	n := &Node{Content: 1}
 	c := n.Copy()
-	n.src = 2
-	if n.src == c.src {
+	n.Content = 2
+	if n.Content == c.Content {
 		t.Fail()
 	}
-}
-
-func TestNode_Source(t *testing.T) {
-	n := &Node{src: 1}
-	assert := asserter.New(t)
-	assert(n.Source() != nil).Error("nil Source")
 }
 
 func TestNode_CheckDir(t *testing.T) {
@@ -92,14 +86,6 @@ func ExampleNode_SetMode() {
 	// output:
 	// ---xrwxr-xr-x 0 0 node
 	// d--xrwxr-xr-x 0 0 node
-}
-
-func TestNode_SetSource(t *testing.T) {
-	n := NewNode("val")
-	n.SetSource(1)
-	if n.src.(int) != 1 {
-		t.Fail()
-	}
 }
 
 func TestNode_Find(t *testing.T) {
