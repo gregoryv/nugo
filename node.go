@@ -53,7 +53,7 @@ func NewRootNode(abspath string, mode NodeMode) *Node {
 // Defaults to mode ModeDir | ModeRoot.
 func NewRoot(abspath string) *Node {
 	n := &Node{
-		name: path.Clean(abspath),
+		Name: path.Clean(abspath),
 	}
 	n.Mode = ModeDir | ModeRoot
 	return n
@@ -62,12 +62,12 @@ func NewRoot(abspath string) *Node {
 // NewNode returns a new node with the given name url path escaped.
 func NewNode(name string) *Node {
 	safe := url.PathEscape(name)
-	return &Node{name: safe}
+	return &Node{Name: safe}
 }
 
 // Node names and links a sibling and a child.
 type Node struct {
-	name string
+	Name string
 	Seal
 	Content interface{}
 
@@ -80,13 +80,10 @@ type Node struct {
 // AbsPath returns the absolute path to this node.
 func (me *Node) AbsPath() string {
 	if me.parent == nil {
-		return me.name
+		return me.Name
 	}
-	return path.Join(me.parent.AbsPath(), me.name)
+	return path.Join(me.parent.AbsPath(), me.Name)
 }
-
-// Name returns the base name of a node
-func (my *Node) Name() string { return my.name }
 
 // SetPerm permission bits of this node.
 func (my *Node) SetPerm(perm NodeMode) {
@@ -161,7 +158,7 @@ func (me *Node) Add(children ...*Node) {
 		n.Mode = me.Mode &^ ModeRoot
 		n.parent = me
 		if n.Mode&ModeDistinct == ModeDistinct {
-			me.delChild(n.Name())
+			me.delChild(n.Name)
 		}
 		switch {
 		case n.Mode&ModeSort == ModeSort:
@@ -186,7 +183,7 @@ func (me *Node) insert(n *Node) {
 	switch {
 	case me.child == nil:
 		me.child = n
-	case n.Name() < me.child.Name():
+	case n.Name < me.child.Name:
 		n.sibling = me.child
 		me.child = n
 	default:
@@ -201,7 +198,7 @@ func (me *Node) insertSibling(c, n *Node) {
 			c.sibling = n
 			return
 		}
-		if n.Name() < c.sibling.Name() {
+		if n.Name < c.sibling.Name {
 			n.sibling = c.sibling
 			c.sibling = n
 			return
@@ -258,7 +255,7 @@ func (me *Node) delChild(name string) *Node {
 		return nil
 	}
 	next := me.child
-	if next.name == name {
+	if next.Name == name {
 		me.child = next.sibling
 		return next
 	}
@@ -271,7 +268,7 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 		if sibling == nil {
 			break
 		}
-		if sibling.name == name {
+		if sibling.Name == name {
 			c.sibling = c.sibling.sibling
 			return sibling
 		}
@@ -282,7 +279,7 @@ func (me *Node) delSibling(c *Node, name string) *Node {
 
 // String todo
 func (me *Node) String() string {
-	return fmt.Sprintf("%s %s", me.Seal, me.name)
+	return fmt.Sprintf("%s %s", me.Seal, me.Name)
 }
 
 // Find returns the node matching the absolute path. This node must be
@@ -292,7 +289,7 @@ func (me *Node) Find(abspath string) (*Node, error) {
 		return nil, fmt.Errorf("Find: %w", err)
 	}
 	fullname := path.Clean(abspath)
-	if fullname == me.Name() {
+	if fullname == me.Name {
 		return me, nil
 	}
 	var n *Node

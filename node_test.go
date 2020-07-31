@@ -150,7 +150,7 @@ func ExampleNode_FirstChild_listAllChildren() {
 		if c == nil {
 			break
 		}
-		fmt.Fprintln(os.Stdout, c.Name())
+		fmt.Fprintln(os.Stdout, c.Name)
 		c = c.sibling
 	}
 	// output:
