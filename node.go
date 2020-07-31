@@ -67,15 +67,15 @@ func NewNode(name string) *Node {
 
 // Node names and links a sibling and a child.
 type Node struct {
-	name    string
-	parent  *Node
-	child   *Node
-	sibling *Node
-
+	name string
 	Seal
 
 	sync.RWMutex
 	src interface{}
+
+	parent  *Node
+	child   *Node
+	sibling *Node
 }
 
 // AbsPath returns the absolute path to this node.
@@ -104,15 +104,16 @@ func (my *Node) SetSource(r interface{}) { my.src = r }
 // IsDir returns true if ModeDir is set
 func (me *Node) IsDir() bool { return me.Mode&ModeDir != 0 }
 
-// IsRoot
-func (me *Node) IsRoot() error {
-	if !me.isRoot() {
+// CheckRoot returns an error if this node is not a root node
+func (me *Node) CheckRoot() error {
+	if !me.IsRoot() {
 		return fmt.Errorf("%s not root", me.AbsPath())
 	}
 	return nil
 }
 
-func (me *Node) isRoot() bool { return me.Mode&ModeRoot != 0 }
+// IsRoot returns true if this is a root node.
+func (me *Node) IsRoot() bool { return me.Mode&ModeRoot != 0 }
 
 // SetMode sets mode of this node.
 func (my *Node) SetMode(Mode NodeMode) {
@@ -286,7 +287,7 @@ func (me *Node) String() string {
 // Find returns the node matching the absolute path. This node must be
 // a root node.
 func (me *Node) Find(abspath string) (*Node, error) {
-	if err := me.IsRoot(); err != nil {
+	if err := me.CheckRoot(); err != nil {
 		return nil, fmt.Errorf("Find: %w", err)
 	}
 	fullname := path.Clean(abspath)

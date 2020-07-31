@@ -40,10 +40,10 @@ func TestNode_IsDir(t *testing.T) {
 	assert(dir.IsDir())
 }
 
-func TestNode_IsRoot(t *testing.T) {
+func TestNode_CheckRoot(t *testing.T) {
 	ok, bad := asserter.NewErrors(t)
-	bad(NewNode("x").IsRoot()).Log("default")
-	ok(NewRootNode("/x", 017555).IsRoot())
+	bad(NewNode("x").CheckRoot()).Log("default")
+	ok(NewRootNode("/x", 017555).CheckRoot())
 }
 
 func TestRootNode_Parent(t *testing.T) {
