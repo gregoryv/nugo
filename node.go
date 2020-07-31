@@ -101,10 +101,18 @@ func (my *Node) SetPerm(perm NodeMode) {
 // SetSource of this node, use nil to clear
 func (my *Node) SetSource(r interface{}) { my.src = r }
 
-// IsDir returns true if ModeDir is set
+// CheckDir returns nil if ModeDir is set
+func (me *Node) CheckDir() error {
+	if !me.IsDir() {
+		return fmt.Errorf("%s not directory", me.AbsPath())
+	}
+	return nil
+}
+
+// IsDir returns true if ModeDir is set.
 func (me *Node) IsDir() bool { return me.Mode&ModeDir != 0 }
 
-// CheckRoot returns an error if this node is not a root node
+// CheckRoot returns nil if ModeRoot is set
 func (me *Node) CheckRoot() error {
 	if !me.IsRoot() {
 		return fmt.Errorf("%s not root", me.AbsPath())
@@ -112,7 +120,7 @@ func (me *Node) CheckRoot() error {
 	return nil
 }
 
-// IsRoot returns true if this is a root node.
+// IsRoot returns true if ModeRoot is set.
 func (me *Node) IsRoot() bool { return me.Mode&ModeRoot != 0 }
 
 // SetMode sets mode of this node.

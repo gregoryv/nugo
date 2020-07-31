@@ -32,6 +32,14 @@ func TestNode_Source(t *testing.T) {
 	assert(n.Source() != nil).Error("nil Source")
 }
 
+func TestNode_CheckDir(t *testing.T) {
+	file := &Node{}
+	dir := &Node{Seal: Seal{Mode: ModeDir}}
+	ok, bad := asserter.NewErrors(t)
+	ok(dir.CheckDir())
+	bad(file.CheckDir())
+}
+
 func TestNode_IsDir(t *testing.T) {
 	file := &Node{}
 	dir := &Node{Seal: Seal{Mode: ModeDir}}
