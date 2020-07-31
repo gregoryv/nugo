@@ -69,10 +69,9 @@ func NewNode(name string) *Node {
 type Node struct {
 	name string
 	Seal
+	Content interface{}
 
 	sync.RWMutex
-	src interface{}
-
 	parent  *Node
 	child   *Node
 	sibling *Node
@@ -89,17 +88,11 @@ func (me *Node) AbsPath() string {
 // Name returns the base name of a node
 func (my *Node) Name() string { return my.name }
 
-// Source returns the nodes resource or nil if none is set
-func (my *Node) Source() interface{} { return my.src }
-
 // SetPerm permission bits of this node.
 func (my *Node) SetPerm(perm NodeMode) {
 	Mode := my.Mode &^ ModePerm // clear previous
 	my.Mode = Mode | perm
 }
-
-// SetSource of this node, use nil to clear
-func (my *Node) SetSource(r interface{}) { my.src = r }
 
 // CheckDir returns nil if ModeDir is set
 func (me *Node) CheckDir() error {
@@ -249,7 +242,7 @@ func (me *Node) Copy() *Node {
 	cp := *me
 	cp.child = nil
 	cp.sibling = nil
-	cp.src = nil
+	cp.Content = nil
 	return &cp
 }
 
