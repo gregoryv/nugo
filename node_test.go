@@ -48,12 +48,6 @@ func TestNode_CheckRoot(t *testing.T) {
 	ok(NewRootNode("/x", 017555).CheckRoot())
 }
 
-func TestRootNode_Sibling(t *testing.T) {
-	rn := NewRootNode("/", ModeDir)
-	assert := asserter.New(t)
-	assert(rn.Sibling() == nil).Error("expect no sibling")
-}
-
 func ExampleNode_UnsetMode() {
 	n := NewNode("node")
 	n.Mode = ModeDir | 01755
@@ -139,7 +133,7 @@ func ExampleNode_FirstChild_listAllChildren() {
 			break
 		}
 		fmt.Fprintln(os.Stdout, c.Name)
-		c = c.sibling
+		c = c.Sibling
 	}
 	// output:
 	// a

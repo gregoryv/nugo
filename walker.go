@@ -45,7 +45,7 @@ func (me *Walker) walk(node *Node, Parent string, fn Visitor) {
 	if (node.IsRoot() || me.recursive) && !me.skipChild {
 		me.walk(node.Child, abspath, fn)
 	}
-	me.walk(node.sibling, Parent, fn)
+	me.walk(node.Sibling, Parent, fn)
 }
 
 // Stop the Walker from your visitor.

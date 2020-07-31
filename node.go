@@ -74,7 +74,7 @@ type Node struct {
 	sync.RWMutex
 	Parent  *Node
 	Child   *Node
-	sibling *Node
+	Sibling *Node
 }
 
 // AbsPath returns the absolute path to this node.
@@ -175,7 +175,7 @@ func (me *Node) append(n *Node) {
 		me.Child = n
 		return
 	}
-	last.sibling = n
+	last.Sibling = n
 }
 
 // insert the node sorted by name
@@ -184,7 +184,7 @@ func (me *Node) insert(n *Node) {
 	case me.Child == nil:
 		me.Child = n
 	case n.Name < me.Child.Name:
-		n.sibling = me.Child
+		n.Sibling = me.Child
 		me.Child = n
 	default:
 		me.insertSibling(me.Child, n)
@@ -194,16 +194,16 @@ func (me *Node) insert(n *Node) {
 // insertSibling inserts n as a sibling of c
 func (me *Node) insertSibling(c, n *Node) {
 	for {
-		if c.sibling == nil {
-			c.sibling = n
+		if c.Sibling == nil {
+			c.Sibling = n
 			return
 		}
-		if n.Name < c.sibling.Name {
-			n.sibling = c.sibling
-			c.sibling = n
+		if n.Name < c.Sibling.Name {
+			n.Sibling = c.Sibling
+			c.Sibling = n
 			return
 		}
-		c = c.sibling
+		c = c.Sibling
 	}
 }
 
@@ -217,22 +217,19 @@ func (me *Node) LastChild() *Node {
 	}
 	last := me.Child
 	for {
-		if last.sibling == nil {
+		if last.Sibling == nil {
 			break
 		}
-		last = last.sibling
+		last = last.Sibling
 	}
 	return last
 }
-
-// Sibling
-func (my *Node) Sibling() *Node { return my.sibling }
 
 // Copy returns a copy of the node without relations and no source.
 func (me *Node) Copy() *Node {
 	cp := *me
 	cp.Child = nil
-	cp.sibling = nil
+	cp.Sibling = nil
 	cp.Content = nil
 	return &cp
 }
@@ -250,7 +247,7 @@ func (me *Node) delChild(name string) *Node {
 	}
 	next := me.Child
 	if next.Name == name {
-		me.Child = next.sibling
+		me.Child = next.Sibling
 		return next
 	}
 	return me.delSibling(me.Child, name)
@@ -258,15 +255,15 @@ func (me *Node) delChild(name string) *Node {
 
 func (me *Node) delSibling(c *Node, name string) *Node {
 	for {
-		sibling := c.sibling
-		if sibling == nil {
+		Sibling := c.Sibling
+		if Sibling == nil {
 			break
 		}
-		if sibling.Name == name {
-			c.sibling = c.sibling.sibling
-			return sibling
+		if Sibling.Name == name {
+			c.Sibling = c.Sibling.Sibling
+			return Sibling
 		}
-		c = sibling
+		c = Sibling
 	}
 	return nil
 }
