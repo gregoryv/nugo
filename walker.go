@@ -31,7 +31,7 @@ func (me *Walker) Walk(node *Node, fn Visitor) {
 	me.walk(node.FirstChild(), node.AbsPath(), fn)
 }
 
-func (me *Walker) walk(node *Node, parent string, fn Visitor) {
+func (me *Walker) walk(node *Node, Parent string, fn Visitor) {
 	if node == nil || me.stopped {
 		return
 	}
@@ -40,12 +40,12 @@ func (me *Walker) walk(node *Node, parent string, fn Visitor) {
 	}
 	me.first = false
 	// less allocation over node.AbsPath()
-	abspath := path.Join(parent, node.Name)
+	abspath := path.Join(Parent, node.Name)
 	fn(node, abspath, me)
 	if (node.IsRoot() || me.recursive) && !me.skipChild {
 		me.walk(node.child, abspath, fn)
 	}
-	me.walk(node.sibling, parent, fn)
+	me.walk(node.sibling, Parent, fn)
 }
 
 // Stop the Walker from your visitor.

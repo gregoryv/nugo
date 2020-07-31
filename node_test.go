@@ -48,12 +48,6 @@ func TestNode_CheckRoot(t *testing.T) {
 	ok(NewRootNode("/x", 017555).CheckRoot())
 }
 
-func TestRootNode_Parent(t *testing.T) {
-	rn := NewRootNode("/", ModeDir)
-	assert := asserter.New(t)
-	assert(rn.Parent() == nil).Error("expect no child")
-}
-
 func TestRootNode_Child(t *testing.T) {
 	rn := NewRootNode("/", ModeDir)
 	assert := asserter.New(t)

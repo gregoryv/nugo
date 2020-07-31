@@ -47,13 +47,13 @@ func largeTree() (int, *nugo.Node) {
 	return count, rn
 }
 
-func addRec(parent *nugo.Node, nodes, level int, count *int) {
+func addRec(Parent *nugo.Node, nodes, level int, count *int) {
 	if level == 0 {
 		return
 	}
 	for i := 0; i < nodes; i++ {
 		child := nugo.NewNode(fmt.Sprintf("%v", i))
-		parent.Add(child)
+		Parent.Add(child)
 		*count = *count + 1
 		addRec(child, nodes, (level - 1), count)
 	}

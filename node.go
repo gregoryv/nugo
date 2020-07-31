@@ -72,17 +72,17 @@ type Node struct {
 	Content interface{}
 
 	sync.RWMutex
-	parent  *Node
+	Parent  *Node
 	child   *Node
 	sibling *Node
 }
 
 // AbsPath returns the absolute path to this node.
 func (me *Node) AbsPath() string {
-	if me.parent == nil {
+	if me.Parent == nil {
 		return me.Name
 	}
-	return path.Join(me.parent.AbsPath(), me.Name)
+	return path.Join(me.Parent.AbsPath(), me.Name)
 }
 
 // SetPerm permission bits of this node.
@@ -156,7 +156,7 @@ func (me *Node) Add(children ...*Node) {
 		n.UID = me.UID
 		n.GID = me.GID
 		n.Mode = me.Mode &^ ModeRoot
-		n.parent = me
+		n.Parent = me
 		if n.Mode&ModeDistinct == ModeDistinct {
 			me.delChild(n.Name)
 		}
@@ -224,9 +224,6 @@ func (me *Node) LastChild() *Node {
 	}
 	return last
 }
-
-// Parent returns parent of this nodo.
-func (my *Node) Parent() *Node { return my.parent }
 
 // Child returns child of this node.
 func (my *Node) Child() *Node { return my.child }
