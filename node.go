@@ -3,32 +3,31 @@ Package nugo provides a graph with unix style modes.
 
 The graph is a set of linked nodes
 
-  root
-    |
-    +-- child
-        sibling
-        sibling
-        |    |
-        *    +-- child
-                 sibling
-                 ...
+	root
+	  |
+	  +-- child
+	      sibling
+	      sibling
+	      |    |
+	      *    +-- child
+	               sibling
+	               ...
 
 Each node references its parent aswell.
 In addition to the standard unix permission rwxrwxrwx another set of
 rwx are added to indicate anonymous access control. Permission bits
 for "Other" means other authenticated.
 
-             rwxrwxrwxrwx    ModePerm
-              n  u  g  o
-              |  |  |  |
-  aNonymous --+  |  |  |
-       User -----+  |  |
-      Group --------+  |
-      Other -----------+
+	           rwxrwxrwxrwx    ModePerm
+	            n  u  g  o
+	            |  |  |  |
+	aNonymous --+  |  |  |
+	     User -----+  |  |
+	    Group --------+  |
+	    Other -----------+
 
 Operations on the graph are not synchronized, this is left to any
 system using it.
-
 */
 package nugo
 
